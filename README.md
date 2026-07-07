@@ -176,10 +176,17 @@ byte parity + size budget):
 ```bash
 cd ../franken_markdown
 scripts/check-wasm-package.sh <run-id>
-cp target/fmd-checks/wasm-package/franken_markdown.{js,d.ts}  ../franken_markdown_website/assets/wasm/
-cp target/fmd-checks/wasm-package/pkg/franken_markdown.js      ../franken_markdown_website/assets/wasm/pkg/
-cp target/fmd-checks/wasm-package/pkg/franken_markdown_bg.wasm ../franken_markdown_website/assets/wasm/pkg/
+V=<engine-version>   # e.g. 0.3.1
+mkdir -p ../franken_markdown_website/assets/wasm/$V/pkg
+cp target/fmd-checks/wasm-package/franken_markdown.{js,d.ts}  ../franken_markdown_website/assets/wasm/$V/
+cp target/fmd-checks/wasm-package/pkg/franken_markdown.js      ../franken_markdown_website/assets/wasm/$V/pkg/
+cp target/fmd-checks/wasm-package/pkg/franken_markdown_bg.wasm ../franken_markdown_website/assets/wasm/$V/pkg/
 ```
+
+Then point the import in `assets/js/render-worker.js` at the new directory and
+bump the worker URL `?v=` in `assets/js/playground.js`. The bundle lives in a
+version-named directory so the wrapper, glue, and binary always update as one
+unit; an edge cache can never pair an old glue file with a new binary.
 
 Never copy an unverified build; the whole point of the playground is that it
 runs the parity-gated engine.

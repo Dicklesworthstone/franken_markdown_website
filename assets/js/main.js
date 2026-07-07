@@ -73,7 +73,11 @@ if ("IntersectionObserver" in window) {
       }
     }
   }, { rootMargin: "0px" });
-  for (const node of document.querySelectorAll("[data-count-to]:not(#viz-deps [data-count-to])")) {
+  for (const node of document.querySelectorAll("[data-count-to]")) {
+    // Counters inside the deps visualization animate when that viz
+    // initializes; a complex :not() selector here would throw on older
+    // browsers and kill the rest of this module.
+    if (node.closest("#viz-deps")) continue;
     io.observe(node);
   }
 }

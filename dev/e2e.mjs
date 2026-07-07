@@ -24,8 +24,10 @@ const browser = await chromium.launch({ executablePath: CHROME });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 
 const consoleErrors = [];
+const fontWarnings = [];
 page.on("console", (msg) => {
   if (msg.type() === "error") consoleErrors.push(msg.text());
+  if (/OTS parsing|Failed to decode downloaded font/i.test(msg.text())) fontWarnings.push(msg.text());
 });
 page.on("pageerror", (err) => consoleErrors.push(String(err)));
 
@@ -193,6 +195,7 @@ const menuVisible = await mobile.locator("#mobile-menu-button").isVisible();
 check("mobile menu button visible", menuVisible);
 
 check("no console errors", consoleErrors.length === 0, consoleErrors.slice(0, 3).join(" | "));
+check("preview fonts accepted (no OTS rejects)", fontWarnings.length === 0, fontWarnings.slice(0, 2).join(" | "));
 
 await browser.close();
 console.log(failures.length === 0 ? "\nALL CHECKS PASSED" : `\n${failures.length} FAILURES: ${failures.join(", ")}`);

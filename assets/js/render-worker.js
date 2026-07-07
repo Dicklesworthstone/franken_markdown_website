@@ -10,7 +10,11 @@
      { type: "result", id, format, ok: false, error }
    Result bytes are transferred (zero-copy) to the main thread. */
 
-import { init, capabilities, renderHtml, renderPdf } from "../wasm/franken_markdown.js";
+/* The wasm bundle lives in a version-named directory so the wrapper, glue,
+   and .wasm always update as one unit: edge caches can never pair an old
+   glue file with a new binary. Bump this path (and the worker URL ?v= in
+   playground.js) when refreshing the engine. */
+import { init, capabilities, renderHtml, renderPdf } from "../wasm/0.3.1/franken_markdown.js";
 
 const booted = (async () => {
   await init();

@@ -248,7 +248,7 @@ function bootPlayground() {
   })();
 
   try {
-    worker = new Worker(new URL("./render-worker.js", import.meta.url), { type: "module" });
+    worker = new Worker(new URL("./render-worker.js?v=4", import.meta.url), { type: "module" });
   } catch (error) {
     setStatus("dead", "WORKER FAILED");
     showFatal(`This browser could not start the render worker: ${error.message}`);
@@ -593,6 +593,8 @@ function bootPlayground() {
     });
   }
 
-  styleToggle(els.toggleHtml, true);
-  styleToggle(els.togglePdf, false);
+  // The fragment may already have switched the active format (#fmt=pdf), so
+  // style the chips from state instead of assuming the HTML default.
+  styleToggle(els.toggleHtml, activeFormat === "html");
+  styleToggle(els.togglePdf, activeFormat === "pdf");
 }
