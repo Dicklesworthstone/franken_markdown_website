@@ -97,6 +97,38 @@ const sampleOk = await page.evaluate(() =>
   document.getElementById("pg-html-frame").srcdoc.includes("clean-room highlighter"));
 check("sample chip swaps document", sampleOk);
 
+// Maximize mode.
+await page.locator("#pg-maximize").click();
+const maxOn = await page.evaluate(() => document.getElementById("pg-root").classList.contains("pg-max"));
+check("maximize enters full page", maxOn);
+await page.waitForTimeout(400);
+await page.screenshot({ path: "dev/screenshots/08-maximized.png" });
+await page.keyboard.press("Escape");
+const maxOff = await page.evaluate(() => !document.getElementById("pg-root").classList.contains("pg-max"));
+check("escape exits full page", maxOff);
+
+// Share: the document travels in the URL fragment.
+await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+await page.locator("#pg-share").click();
+await page.waitForFunction(() => window.location.hash.includes("doc="), null, { timeout: 10000 });
+const shareHash = await page.evaluate(() => window.location.hash);
+check("share builds doc-carrying hash", /^#view=max&(fmt=pdf&)?z?doc=/.test(shareHash), `${shareHash.length} chars`);
+
+// Round trip: open the share link in a fresh page.
+const reader = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await reader.goto("http://localhost:8899/" + shareHash, { waitUntil: "networkidle" });
+await reader.waitForFunction(() => document.getElementById("pg-status")?.textContent?.includes("ALIVE"), null, { timeout: 30000 }).catch(() => {});
+const rtMax = await reader.evaluate(() => document.getElementById("pg-root").classList.contains("pg-max"));
+const rtDoc = await reader.evaluate(() => document.getElementById("pg-input").value);
+check("share link opens maximized", rtMax);
+check("share link carries the document", rtDoc.includes("clean-room highlighter"));
+await reader.waitForFunction(() => document.getElementById("pg-html-frame").srcdoc.includes("clean-room highlighter"), null, { timeout: 15000 }).catch(() => {});
+const rtRendered = await reader.evaluate(() => document.getElementById("pg-html-frame").srcdoc.includes("clean-room highlighter"));
+check("shared document renders on load", rtRendered);
+await reader.screenshot({ path: "dev/screenshots/09-shared-link.png" });
+await reader.close();
+await page.evaluate(() => history.replaceState(null, "", "#"));
+
 // Visualizations init.
 await page.locator("#pipeline").scrollIntoViewIfNeeded();
 await page.waitForTimeout(700);

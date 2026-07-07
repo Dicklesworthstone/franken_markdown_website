@@ -123,6 +123,9 @@ wrapping-badness solver spends the page width where it reduces wrapping.
 };
 
 const els = {
+  root: document.getElementById("pg-root"),
+  maximize: document.getElementById("pg-maximize"),
+  share: document.getElementById("pg-share"),
   input: document.getElementById("pg-input"),
   highlight: document.getElementById("pg-highlight"),
   toggleHtml: document.getElementById("pg-toggle-html"),
@@ -146,6 +149,60 @@ const els = {
   previewLabel: document.getElementById("pg-preview-label")
 };
 
+/* --- URL fragment codec: the document travels inside the link. ---
+   #zdoc=<base64url(deflate-raw(utf8))>  compressed payload (preferred)
+   #doc=<base64url(utf8)>                uncompressed fallback
+   #view=max                             open the playground full-page
+   #fmt=pdf                              start on the PDF pane */
+
+function b64urlEncode(bytes) {
+  let binary = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function b64urlDecode(text) {
+  const b64 = text.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(text.length / 4) * 4, "=");
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function pipeBytes(bytes, TransformCtor, mode) {
+  const stream = new Blob([bytes]).stream().pipeThrough(new TransformCtor(mode));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+function parseFragment() {
+  const raw = window.location.hash.slice(1);
+  if (!raw || !raw.includes("=")) return {};
+  const params = new URLSearchParams(raw);
+  return {
+    doc: params.get("doc"),
+    zdoc: params.get("zdoc"),
+    fmt: params.get("fmt"),
+    view: params.get("view")
+  };
+}
+
+async function decodeFragmentDoc(frag) {
+  try {
+    if (frag.zdoc && typeof DecompressionStream !== "undefined") {
+      return new TextDecoder().decode(await pipeBytes(b64urlDecode(frag.zdoc), DecompressionStream, "deflate-raw"));
+    }
+    if (frag.doc) {
+      return new TextDecoder().decode(b64urlDecode(frag.doc));
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 if (els.input) {
   bootPlayground();
 }
@@ -162,6 +219,7 @@ function bootPlayground() {
   let nextId = 1;
   let pdfUrl = null;
   let pdfFallbackUrl = null;
+  let maximized = false;
 
   const pendingResolvers = new Map();
   const live = {
@@ -175,6 +233,20 @@ function bootPlayground() {
   els.input.value = SAMPLES.showcase;
   refreshEditor();
 
+  /* Apply the URL fragment (maximize view, start format, embedded document)
+     before the first render so shared links open exactly as authored. */
+  const fragmentApplied = (async () => {
+    const frag = parseFragment();
+    if (frag.view === "max") setMaximized(true);
+    if (frag.fmt === "pdf") setFormat("pdf");
+    const doc = await decodeFragmentDoc(frag);
+    if (doc !== null) {
+      els.input.value = doc;
+      refreshEditor();
+      docVersion += 1;
+    }
+  })();
+
   try {
     worker = new Worker(new URL("./render-worker.js", import.meta.url), { type: "module" });
   } catch (error) {
@@ -186,9 +258,11 @@ function bootPlayground() {
   worker.onmessage = (event) => {
     const msg = event.data;
     if (msg.type === "ready") {
-      workerReady = true;
-      setStatus("alive", "IT'S ALIVE");
-      ensureLive("html");
+      fragmentApplied.finally(() => {
+        workerReady = true;
+        setStatus("alive", "IT'S ALIVE");
+        ensureLive(activeFormat);
+      });
       return;
     }
     if (msg.type === "init-error") {
@@ -356,6 +430,54 @@ function bootPlayground() {
     button.classList.toggle("text-slate-400", !active);
   }
 
+  function setMaximized(on) {
+    maximized = on;
+    els.root.classList.toggle("pg-max", on);
+    els.root.classList.add("revealed");
+    document.body.classList.toggle("pg-max-open", on);
+    els.maximize.setAttribute("aria-pressed", String(on));
+    els.maximize.querySelector(".pg-max-icon-expand").classList.toggle("hidden", on);
+    els.maximize.querySelector(".pg-max-icon-collapse").classList.toggle("hidden", !on);
+    els.maximize.querySelector(".pg-max-label").textContent = on ? "Exit" : "Maximize";
+  }
+
+  /* Build a link that carries the document in the URL fragment: no server,
+     no storage — the fragment never even leaves the browser. */
+  async function share() {
+    const bytes = new TextEncoder().encode(els.input.value);
+    let param = "doc";
+    let payload = bytes;
+    if (typeof CompressionStream !== "undefined") {
+      try {
+        payload = await pipeBytes(bytes, CompressionStream, "deflate-raw");
+        param = "zdoc";
+      } catch {
+        payload = bytes;
+        param = "doc";
+      }
+    }
+    const parts = ["view=max"];
+    if (activeFormat === "pdf") parts.push("fmt=pdf");
+    parts.push(`${param}=${b64urlEncode(payload)}`);
+    history.replaceState(null, "", `#${parts.join("&")}`);
+    const url = window.location.href;
+    let copied = true;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      copied = false;
+    }
+    els.share.textContent = copied ? "✓ Link copied" : "✓ Link in address bar";
+    window.setTimeout(() => {
+      els.share.textContent = "⚡ Share";
+    }, 2200);
+    if (url.length > 30000) {
+      showDiagnostics([{ severity: "warning", start: 0, end: 0, message: `share link is ${url.length.toLocaleString()} characters — some chat apps truncate very long URLs` }]);
+    } else {
+      els.stats.textContent = `share link: ${url.length.toLocaleString()} chars — the document travels inside the URL`;
+    }
+  }
+
   async function download(format) {
     const cached = presented[format];
     let res;
@@ -404,6 +526,25 @@ function bootPlayground() {
   els.togglePdf.addEventListener("click", () => setFormat("pdf"));
   els.downloadHtml.addEventListener("click", () => download("html"));
   els.downloadPdf.addEventListener("click", () => download("pdf"));
+  els.maximize.addEventListener("click", () => setMaximized(!maximized));
+  els.share.addEventListener("click", () => { void share(); });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && maximized) setMaximized(false);
+  });
+  window.addEventListener("hashchange", () => {
+    void (async () => {
+      const frag = parseFragment();
+      if (frag.view === "max") setMaximized(true);
+      if (frag.fmt === "pdf") setFormat("pdf");
+      const doc = await decodeFragmentDoc(frag);
+      if (doc !== null && doc !== els.input.value) {
+        els.input.value = doc;
+        refreshEditor();
+        docVersion += 1;
+        ensureLive(activeFormat);
+      }
+    })();
+  });
 
   for (const control of [els.font, els.dark, els.linenos]) {
     control.addEventListener("change", () => {

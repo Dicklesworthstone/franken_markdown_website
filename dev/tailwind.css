@@ -429,6 +429,50 @@ code, pre, kbd {
 .md-hr { color: #4e6f5e; font-weight: 700; }
 .md-task { color: var(--color-gold); }
 
+/* Maximized playground: #pg-root becomes a fixed full-viewport surface and the
+   panes flex to fill it. Entered via the maximize button or a #view=max link. */
+body.pg-max-open {
+  overflow: hidden;
+}
+#pg-root.pg-max {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  margin: 0;
+  border-radius: 0;
+  background: var(--color-bg);
+  padding: clamp(6px, 1.2vw, 14px);
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  transform: none;
+}
+#pg-root.pg-max > .franken-bolt { display: none; }
+#pg-root.pg-max #pg-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  border-radius: 0.75rem;
+}
+#pg-root.pg-max .pg-panes {
+  flex: 1;
+  min-height: 0;
+  grid-template-rows: 1fr;
+}
+@media (max-width: 1023.5px) {
+  #pg-root.pg-max .pg-panes { grid-template-rows: 1fr 1fr; }
+}
+#pg-root.pg-max .pg-panes > div {
+  min-height: 0;
+  height: 100%;
+}
+#pg-root.pg-max .pg-pane-size {
+  height: auto !important;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
 /* Preview iframes */
 .pg-frame {
   width: 100%;

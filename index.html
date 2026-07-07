@@ -214,7 +214,7 @@
         </p>
       </div>
 
-      <div class="group relative rounded-2xl border border-white/5 bg-black/40 reveal">
+      <div id="pg-root" class="group relative rounded-2xl border border-white/5 bg-black/40 reveal">
         <div class="absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none z-0">
           <div class="absolute inset-0 stitch-skin opacity-[0.05]"></div>
         </div>
@@ -234,7 +234,7 @@
           <div class="h-[60%] w-[1.5px] bg-slate-800 rotate-45 absolute"></div><div class="h-[60%] w-[1.5px] bg-slate-800 -rotate-45 absolute"></div>
         </div>
 
-        <div class="relative z-10 glass-modern rounded-2xl overflow-hidden">
+        <div id="pg-shell" class="relative z-10 glass-modern rounded-2xl overflow-hidden">
           <!-- Playground chrome -->
           <div class="flex flex-wrap items-center justify-between gap-3 px-5 md:px-6 py-4 bg-white/5 border-b border-white/5">
             <div class="flex items-center gap-3">
@@ -252,6 +252,12 @@
                 <span id="pg-status-dot" class="h-1.5 w-1.5 rounded-full bg-emerald-500/60 animate-pulse"></span>
                 <span id="pg-status" class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em]">REANIMATING…</span>
               </div>
+              <button id="pg-maximize" aria-pressed="false" title="Maximize the playground (Esc to exit)"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-slate-300 hover:border-emerald-500/50 hover:text-emerald-300 transition-colors">
+                <svg class="h-3.5 w-3.5 pg-max-icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+                <svg class="h-3.5 w-3.5 pg-max-icon-collapse hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M3 21l7-7"/></svg>
+                <span class="pg-max-label">Maximize</span>
+              </button>
             </div>
           </div>
 
@@ -294,28 +300,30 @@
               </label>
               <button id="pg-download-html" class="px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-slate-300 hover:border-emerald-500/50 hover:text-emerald-300 transition-colors">↓ HTML</button>
               <button id="pg-download-pdf" class="px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-slate-300 hover:border-emerald-500/50 hover:text-emerald-300 transition-colors">↓ PDF</button>
+              <button id="pg-share" title="Copy a link that carries this document inside the URL itself"
+                class="px-4 py-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 text-[10px] font-black uppercase tracking-[0.15em] text-emerald-300 hover:bg-emerald-500 hover:text-black transition-colors">⚡ Share</button>
             </div>
           </div>
 
           <!-- Panes -->
-          <div class="grid lg:grid-cols-2">
-            <div class="border-b lg:border-b-0 lg:border-r border-white/5 flex flex-col">
+          <div class="pg-panes grid lg:grid-cols-2">
+            <div class="border-b lg:border-b-0 lg:border-r border-white/5 flex flex-col min-h-0">
               <div class="flex items-center justify-between px-5 py-2.5 bg-white/[0.02] border-b border-white/5">
                 <span class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500">source.md</span>
                 <span id="pg-count" class="font-mono text-[10px] text-slate-600">0 B</span>
               </div>
-              <div class="pg-editor-wrap h-[420px] lg:h-[600px]">
+              <div class="pg-editor-wrap pg-pane-size h-[420px] lg:h-[600px]">
                 <pre id="pg-highlight" aria-hidden="true"></pre>
                 <textarea id="pg-input" spellcheck="false" autocomplete="off" autocapitalize="off"
                   aria-label="Markdown source editor"></textarea>
               </div>
             </div>
-            <div class="flex flex-col">
+            <div class="flex flex-col min-h-0">
               <div class="flex items-center justify-between px-5 py-2.5 bg-white/[0.02] border-b border-white/5">
                 <span id="pg-preview-label" class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500">self_contained.html</span>
                 <span class="text-[9px] font-black uppercase tracking-[0.25em] text-emerald-500/60">RENDERED_IN_BROWSER</span>
               </div>
-              <div class="relative h-[420px] lg:h-[600px] bg-[#0c0f0d]">
+              <div class="pg-pane-size relative h-[420px] lg:h-[600px] bg-[#0c0f0d]">
                 <div id="pg-pane-html" class="absolute inset-0">
                   <iframe id="pg-html-frame" class="pg-frame" title="Rendered HTML preview" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>
                 </div>
@@ -337,6 +345,32 @@
             <span class="flex-1"></span>
             <span id="pg-stats" class="text-slate-500"></span>
           </div>
+        </div>
+      </div>
+      <div class="mt-8 grid md:grid-cols-2 gap-5 reveal">
+        <div class="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.03] p-6">
+          <div class="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-400/80 mb-3">⚡ Serverless sharing — the document <em>is</em> the link</div>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            <strong class="text-slate-200">Share</strong> compresses your Markdown with deflate, base64url-encodes it,
+            and packs it into the <code class="text-emerald-300">#</code> fragment of the URL — like
+            <code class="text-emerald-300 break-all">franken-markdown.com/#view=max&amp;zdoc=…</code>.
+            Nothing is uploaded, stored, or logged: URL fragments are never even sent to the server, and this
+            site has no backend anyway. Whoever opens your link gets the exact document, decompressed and
+            re-typeset locally by the same wasm engine. Documents up to roughly 30&nbsp;KB of URL travel well
+            in every modern browser.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+          <div class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-3">Deep links</div>
+          <p class="text-sm text-slate-400 leading-relaxed mb-3">
+            The playground itself is linkable. Fragment parameters compose:
+          </p>
+          <ul class="text-sm font-mono space-y-2">
+            <li><a class="text-emerald-300 hover:text-emerald-200 underline decoration-emerald-500/30" href="#view=max"><span class="select-all">/#view=max</span></a> <span class="text-slate-500 font-sans">— open the playground maximized, full page</span></li>
+            <li><span class="text-emerald-300">/#fmt=pdf</span> <span class="text-slate-500 font-sans">— start on the PDF pane</span></li>
+            <li><span class="text-emerald-300">/#zdoc=…</span> <span class="text-slate-500 font-sans">— deflated + base64url document payload</span></li>
+            <li><span class="text-emerald-300">/#doc=…</span> <span class="text-slate-500 font-sans">— plain base64url payload (no compression)</span></li>
+          </ul>
         </div>
       </div>
       <noscript>

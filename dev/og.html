@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1200px; height: 630px; overflow: hidden; }
+  .stage {
+    width: 1200px; height: 630px; position: relative; overflow: hidden;
+    background-color: #020a06; color: #fff;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .grid-layer {
+    position: absolute; inset: 0; opacity: 0.5;
+    background-image:
+      linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .shot-layer {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; opacity: 0.1; filter: grayscale(1) contrast(1.2);
+  }
+  .vignette {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at center, transparent 0%, rgba(2, 10, 6, 0.85) 100%);
+  }
+  .glow {
+    position: absolute; top: -200px; left: 10%; width: 800px; height: 800px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.16) 0%, transparent 70%);
+  }
+  .frame { position: absolute; inset: 20px; border: 1px solid rgba(16, 185, 129, 0.12); }
+  .bolt {
+    position: absolute; width: 16px; height: 16px; border-radius: 50%;
+    background: #14261c; border: 1px solid #10b981;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .bolt::before, .bolt::after {
+    content: ""; position: absolute; width: 10px; height: 1px; background: #10b981;
+  }
+  .bolt::before { transform: rotate(45deg); }
+  .bolt::after { transform: rotate(-45deg); }
+  .stitch {
+    position: absolute; left: 25%; right: 25%; height: 1px;
+    border-top: 2px dashed rgba(16, 185, 129, 0.32);
+  }
+  .content {
+    position: relative; display: flex; flex-direction: row; align-items: center;
+    width: 100%; height: 100%; padding: 80px; z-index: 10;
+  }
+  .head-wrap { position: relative; margin-right: 64px; display: flex; }
+  .head-glow {
+    position: absolute; inset: -20px; background: rgba(16, 185, 129, 0.12);
+    border-radius: 40px; filter: blur(40px);
+  }
+  .head {
+    width: 280px; height: 280px; border-radius: 48px;
+    border: 2px solid rgba(16, 185, 129, 0.25);
+    box-shadow: 0 0 60px rgba(16, 185, 129, 0.35);
+    background: rgba(4, 20, 12, 0.6); position: relative;
+    padding: 14px;
+  }
+  .badge-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .badge-dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
+  .badge-text { font-size: 14px; font-weight: 900; color: #ef4444; letter-spacing: 4px; }
+  .title {
+    font-size: 62px; font-weight: 900; color: #fff; line-height: 1; letter-spacing: -2px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; white-space: nowrap;
+  }
+  .tagline { font-size: 31px; font-weight: 700; color: #34d399; margin-top: 20px; letter-spacing: -0.5px; }
+  .stats {
+    display: flex; gap: 40px; margin-top: 40px; padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .stat { display: flex; flex-direction: column; gap: 4px; }
+  .stat .label { font-size: 11px; font-weight: 900; color: #64748b; letter-spacing: 2px; }
+  .stat .val { font-size: 20px; font-weight: 900; color: #fff; }
+  .hud-top {
+    position: absolute; top: 40px; right: 40px; display: flex; flex-direction: column;
+    align-items: flex-end; gap: 4px;
+  }
+  .hud-top .t { font-size: 10px; font-weight: 900; color: rgba(16, 185, 129, 0.45); letter-spacing: 2px; }
+  .hud-top .bar { width: 120px; height: 2px; background: rgba(16, 185, 129, 0.2); }
+  .domain {
+    position: absolute; bottom: 40px; right: 40px; display: flex; align-items: center;
+    background: rgba(16, 185, 129, 0.06); padding: 9px 22px; border-radius: 9999px;
+    border: 1px solid rgba(16, 185, 129, 0.14);
+  }
+  .domain span { font-size: 18px; font-weight: 900; color: #34d399; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="grid-layer"></div>
+    <img class="shot-layer" src="screenshots/08-maximized.png" alt="">
+    <div class="vignette"></div>
+    <div class="glow"></div>
+    <div class="frame"></div>
+    <div class="bolt" style="top: 12px; left: 12px;"></div>
+    <div class="bolt" style="top: 12px; right: 12px;"></div>
+    <div class="bolt" style="bottom: 12px; left: 12px;"></div>
+    <div class="bolt" style="bottom: 12px; right: 12px;"></div>
+    <div class="stitch" style="top: 20px;"></div>
+    <div class="stitch" style="bottom: 20px;"></div>
+
+    <div class="content">
+      <div class="head-wrap">
+        <div class="head-glow"></div>
+        <img class="head" src="franken_face.png" alt="">
+      </div>
+      <div style="display: flex; flex-direction: column; flex: 1;">
+        <div class="badge-row">
+          <div class="badge-dot"></div>
+          <div class="badge-text">RENDERER_ALIVE</div>
+        </div>
+        <div class="title">franken_markdown</div>
+        <div class="tagline">The Monster Markdown Engine.</div>
+        <div class="stats">
+          <div class="stat"><span class="label">ENGINE</span><span class="val">0 DEPENDENCIES</span></div>
+          <div class="stat"><span class="label">OUTPUT</span><span class="val">HTML + TAGGED PDF</span></div>
+          <div class="stat"><span class="label">WASM ↔ NATIVE</span><span class="val">BYTE-IDENTICAL</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud-top">
+      <div class="t">ORIGIN_PROTOCOL_V0.3.0</div>
+      <div class="bar"></div>
+    </div>
+    <div class="domain"><span>FRANKEN-MARKDOWN.COM</span></div>
+  </div>
+</body>
+</html>
