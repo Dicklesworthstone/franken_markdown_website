@@ -1,0 +1,15 @@
+# Cloudflare Pages headers. GitHub Pages ignores this file (see .nojekyll).
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/assets/*
+  Cache-Control: public, max-age=86400
+
+/assets/wasm/pkg/franken_markdown_bg.wasm
+  Content-Type: application/wasm
+  Cache-Control: public, max-age=86400

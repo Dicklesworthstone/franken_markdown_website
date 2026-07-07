@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>franken_markdown — The Monster Markdown Engine</title>
+  <meta name="description" content="A clean-room, zero-dependency Rust engine that renders Markdown to beautiful self-contained HTML and compact tagged PDF — natively and in your browser via WASM, byte-for-byte identical. Try it live.">
+  <meta name="theme-color" content="#020a06">
+  <link rel="canonical" href="https://franken-markdown.com/">
+  <meta property="og:title" content="franken_markdown — The Monster Markdown Engine">
+  <meta property="og:description" content="Markdown → polished HTML + LaTeX-grade PDF from one auditable Rust core. Zero dependencies. WASM first-class. Rendered live in your browser.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://franken-markdown.com/">
+  <meta property="og:image" content="https://franken-markdown.com/assets/img/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://franken-markdown.com/assets/img/og.png">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23020a06'/%3E%3Crect width='64' height='64' rx='14' fill='none' stroke='%2310b981' stroke-opacity='0.5' stroke-width='2'/%3E%3Ctext x='32' y='44' font-family='monospace' font-size='36' font-weight='900' fill='%2334d399' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E">
+  <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/css/site.css">
+  <link rel="modulepreload" href="assets/wasm/franken_markdown.js">
+  <link rel="modulepreload" href="assets/wasm/pkg/franken_markdown.js">
+</head>
+<body class="min-h-screen">
+  <a href="#playground" class="skip-link">Skip to the playground</a>
+
+  <!-- Ambient glow orbs -->
+  <div class="glow-orb h-[420px] w-[420px] left-[-120px] top-[-80px]" style="background: radial-gradient(circle, rgba(16,185,129,0.16), transparent 70%)"></div>
+  <div class="glow-orb h-[520px] w-[520px] right-[-160px] top-[30vh]" style="background: radial-gradient(circle, rgba(0,66,37,0.5), transparent 70%); animation-delay: -9s"></div>
+  <div class="glow-orb h-[380px] w-[380px] left-[30vw] bottom-[-140px]" style="background: radial-gradient(circle, rgba(251,191,36,0.07), transparent 70%); animation-delay: -17s"></div>
+
+  <!-- ============================== HEADER ============================== -->
+  <header id="site-header"
+    class="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-[94%] lg:w-[1200px] h-14 md:h-16 px-4 md:px-8 rounded-full border border-transparent transition-all duration-500 flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-3 group">
+      <div class="relative h-9 w-9 rounded-lg bg-gradient-to-tr from-[#004225] to-emerald-400 flex items-center justify-center font-mono font-black text-black text-lg shadow-[0_0_20px_rgba(16,185,129,0.25)]">
+        F
+        <div class="franken-bolt absolute -left-1 -top-1 h-2.5 w-2.5 rounded-full bg-gradient-to-br from-slate-700 via-slate-900 to-black border border-white/10 flex items-center justify-center">
+          <div class="h-[60%] w-px bg-slate-800 rotate-45 absolute"></div>
+          <div class="h-[60%] w-px bg-slate-800 -rotate-45 absolute"></div>
+        </div>
+        <div class="franken-bolt absolute -right-1 -bottom-1 h-2.5 w-2.5 rounded-full bg-gradient-to-br from-slate-700 via-slate-900 to-black border border-white/10 flex items-center justify-center">
+          <div class="h-[60%] w-px bg-slate-800 rotate-45 absolute"></div>
+          <div class="h-[60%] w-px bg-slate-800 -rotate-45 absolute"></div>
+        </div>
+      </div>
+      <div class="leading-none">
+        <div class="font-black tracking-tight text-sm md:text-base">franken_markdown</div>
+        <div class="text-[7px] font-black text-emerald-500 uppercase tracking-widest animate-pulse mt-1">RENDERER_ALIVE</div>
+      </div>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-1" aria-label="Primary">
+      <a href="#playground" class="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors">Playground</a>
+      <a href="#pipeline" class="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors">Pipeline</a>
+      <a href="#typography" class="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors">Typography</a>
+      <a href="#features" class="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors">Features</a>
+      <a href="#install" class="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors">Install</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <a href="https://github.com/Dicklesworthstone/franken_markdown" target="_blank" rel="noopener"
+        class="hidden md:inline-flex px-5 py-2 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-colors">GitHub</a>
+      <button id="mobile-menu-button" aria-expanded="false" aria-controls="mobile-menu"
+        class="md:hidden h-10 w-10 rounded-full border border-emerald-500/20 bg-emerald-500/5 flex flex-col items-center justify-center gap-1">
+        <span class="sr-only">Menu</span>
+        <span class="block h-0.5 w-4 bg-emerald-400"></span>
+        <span class="block h-0.5 w-4 bg-emerald-400"></span>
+        <span class="block h-0.5 w-4 bg-emerald-400"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile drawer -->
+  <div id="mobile-menu" class="fixed inset-y-0 right-0 z-[60] w-72 translate-x-full transition-transform duration-500 bg-[#020a06] border-l border-emerald-500/20 p-8 flex flex-col gap-2 md:hidden">
+    <div class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-4">LAB_MENU</div>
+    <a href="#playground" class="py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Playground</a>
+    <a href="#pipeline" class="py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Pipeline</a>
+    <a href="#typography" class="py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Typography</a>
+    <a href="#features" class="py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Features</a>
+    <a href="#install" class="py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Install</a>
+    <a href="https://github.com/Dicklesworthstone/franken_markdown" target="_blank" rel="noopener" class="mt-6 px-5 py-3 rounded-2xl bg-white text-black text-center text-[10px] font-black uppercase tracking-widest">GitHub</a>
+  </div>
+
+  <main id="top">
+    <!-- ============================== HERO ============================== -->
+    <section class="relative px-6 pt-36 md:pt-48 pb-16 md:pb-24 max-w-7xl mx-auto">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/5 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-8">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+            V0.3.0 Alive on Crates.io
+          </div>
+
+          <h1 class="text-[clamp(3rem,8vw,6.5rem)] font-black tracking-tight leading-[0.85] text-white mb-10">
+            The<br>
+            <span class="franken-glitch text-red-500" data-glitch="Monster">Monster</span><br>
+            Markdown<br>Engine.
+          </h1>
+
+          <p class="text-lg md:text-xl text-slate-400 font-medium leading-relaxed max-w-2xl mb-12">
+            Stitched together from a clean-room parser, LaTeX-grade typesetting, and a
+            hand-rolled PDF writer — one auditable Rust core with
+            <span class="text-emerald-400 font-bold">zero dependencies</span> that renders
+            Markdown to beautiful self-contained HTML and compact tagged PDF.
+            Natively, and in this very page via WASM. Byte-for-byte identical.
+          </p>
+
+          <div class="flex flex-wrap gap-4">
+            <a href="#playground" class="px-8 md:px-10 py-4 md:py-5 rounded-2xl bg-emerald-500 text-black font-black text-base md:text-lg shadow-[0_0_40px_rgba(16,185,129,0.3)] hover:bg-white transition-colors active:scale-95">
+              TRY THE PLAYGROUND
+            </a>
+            <a href="#install" class="px-8 md:px-10 py-4 md:py-5 rounded-2xl bg-white/5 border border-emerald-500/20 text-white font-black text-base md:text-lg hover:bg-emerald-500/10 hover:border-emerald-500/40 transition-colors active:scale-95">
+              GET STARTED
+            </a>
+            <a href="https://github.com/Dicklesworthstone/franken_markdown" target="_blank" rel="noopener" class="px-8 md:px-10 py-4 md:py-5 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-base md:text-lg hover:bg-white/10 transition-colors active:scale-95">
+              VIEW SOURCE
+            </a>
+          </div>
+        </div>
+
+        <!-- Terminal specimen -->
+        <div class="relative reveal">
+          <div id="franken-eye" class="absolute -top-10 right-6 z-20 h-12 w-12 rounded-full bg-white border-2 border-slate-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] overflow-hidden flex items-center justify-center rotate-12 animate-float">
+            <div class="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_30%,_#fff_0%,_#e2e8f0_100%)]"></div>
+            <svg class="eye-veins absolute inset-0 opacity-30 transition-opacity" viewBox="0 0 100 100">
+              <path d="M 15 15 Q 30 35 45 45" stroke="#ef4444" stroke-width="0.8" fill="none"/>
+              <path d="M 85 15 Q 70 35 55 45" stroke="#ef4444" stroke-width="0.8" fill="none"/>
+              <path d="M 15 85 Q 30 65 45 55" stroke="#ef4444" stroke-width="0.8" fill="none"/>
+              <path d="M 85 85 Q 70 65 55 55" stroke="#ef4444" stroke-width="0.8" fill="none"/>
+            </svg>
+            <div class="eye-iris relative h-6 w-6 rounded-full bg-emerald-600 border border-emerald-800 flex items-center justify-center shadow-[inset_0_0_10px_rgba(0,0,0,0.3)] transition-transform duration-150 ease-out">
+              <div class="absolute inset-0 bg-[repeating-conic-gradient(from_0deg,_transparent_0deg_10deg,_rgba(0,0,0,0.1)_10deg_20deg)] opacity-40 rounded-full"></div>
+              <div class="h-3 w-3 rounded-full bg-slate-950"></div>
+              <div class="absolute top-1 left-1 h-1.5 w-1.5 rounded-full bg-white/60"></div>
+            </div>
+            <div class="eye-lid-top absolute top-0 left-0 right-0 h-1/2 bg-slate-950 origin-top transition-transform duration-100" style="transform: scaleY(0)"></div>
+            <div class="eye-lid-bottom absolute bottom-0 left-0 right-0 h-1/2 bg-slate-950 origin-bottom transition-transform duration-100" style="transform: scaleY(0)"></div>
+            <div class="absolute inset-0 shadow-[inset_0_4px_12px_rgba(0,0,0,0.4)] rounded-full z-30 pointer-events-none"></div>
+          </div>
+
+          <div class="absolute -inset-1 bg-gradient-to-r from-[#004225] to-emerald-500 rounded-[2rem] blur opacity-25"></div>
+          <div class="border-beam-host relative glass-modern rounded-3xl overflow-hidden shadow-2xl border border-white/5 bg-black/60">
+            <div class="border-beam"></div>
+            <div class="relative flex items-center justify-between px-6 py-4 bg-white/5 border-b border-white/5">
+              <div class="flex items-center gap-3">
+                <div class="flex gap-1.5">
+                  <div class="h-2.5 w-2.5 rounded-full bg-red-500/40"></div>
+                  <div class="h-2.5 w-2.5 rounded-full bg-yellow-500/40"></div>
+                  <div class="h-2.5 w-2.5 rounded-full bg-green-500/40"></div>
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">fmd_render_stream</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></span>
+                <span class="text-[8px] font-black text-emerald-500 uppercase tracking-widest">Live Session</span>
+              </div>
+            </div>
+            <pre id="hero-terminal" class="relative p-6 md:p-8 font-mono text-[12px] md:text-[13px] leading-relaxed min-h-[240px] whitespace-pre-wrap"></pre>
+          </div>
+
+          <div class="absolute -bottom-6 -left-4 md:-left-8 glass-modern rounded-2xl px-5 py-4 animate-float" style="animation-delay: -3s">
+            <div class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 mb-1">Core Crates</div>
+            <div class="text-3xl font-black text-emerald-400 tabular-nums">0<span class="text-sm text-slate-500 ml-2">deps</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="group relative rounded-2xl border border-white/5 bg-black/40 mt-24 md:mt-32 reveal">
+        <div class="absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none">
+          <div class="absolute inset-0 stitch-skin opacity-[0.05]"></div>
+        </div>
+        <svg class="absolute -top-[6px] left-1/4 w-1/2 opacity-20 transition-opacity duration-500 group-hover:opacity-60" height="12" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M5 6 L15 6 M10 1 L10 11 M25 6 L35 6 M30 1 L30 11 M45 6 L55 6 M50 1 L50 11 M65 6 L75 6 M70 1 L70 11 M85 6 L95 6 M90 1 L90 11" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+        <svg class="absolute -bottom-[6px] left-1/4 w-1/2 opacity-20 transition-opacity duration-500 group-hover:opacity-60" height="12" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M5 6 L15 6 M10 1 L10 11 M25 6 L35 6 M30 1 L30 11 M45 6 L55 6 M50 1 L50 11 M65 6 L75 6 M70 1 L70 11 M85 6 L95 6 M90 1 L90 11" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+        <div class="relative z-10 grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-white/5">
+          <div class="bg-[#020a06]/80 px-6 py-10 text-center">
+            <div class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-3">Engine Dependencies</div>
+            <div class="text-4xl sm:text-5xl font-black tabular-nums text-white">0</div>
+            <div class="text-xs text-slate-500 mt-2">the core is 100% our Rust</div>
+          </div>
+          <div class="bg-[#020a06]/80 px-6 py-10 text-center">
+            <div class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-3">Native ↔ WASM Parity</div>
+            <div class="text-4xl sm:text-5xl font-black tabular-nums text-white"><span data-count-to="100" data-count-suffix="%">100%</span></div>
+            <div class="text-xs text-slate-500 mt-2">byte-identical HTML + PDF, gated in CI</div>
+          </div>
+          <div class="bg-[#020a06]/80 px-6 py-10 text-center">
+            <div class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-3">CommonMark Ratchet</div>
+            <div class="text-4xl sm:text-5xl font-black tabular-nums text-white"><span data-count-to="379">379</span></div>
+            <div class="text-xs text-slate-500 mt-2">conformance floor that can only rise</div>
+          </div>
+          <div class="bg-[#020a06]/80 px-6 py-10 text-center">
+            <div class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-3">WASM Payload</div>
+            <div class="text-4xl sm:text-5xl font-black tabular-nums text-white">1.5<span class="text-lg text-slate-500 ml-1">MB gz</span></div>
+            <div class="text-xs text-slate-500 mt-2">fonts, highlighter &amp; PDF writer included</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== PLAYGROUND ============================== -->
+    <section id="playground" class="relative px-4 md:px-6 py-16 md:py-32 max-w-[1400px] mx-auto">
+      <div class="text-center mb-12 md:mb-16 reveal">
+        <div class="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-4">
+          <span class="h-px w-8 bg-emerald-500/40"></span>
+          SPECIMEN_001 · LIVE EXPERIMENT
+          <span class="h-px w-8 bg-emerald-500/40"></span>
+        </div>
+        <h2 class="text-4xl md:text-6xl font-black tracking-tight mb-5">The Operating <span class="text-emerald-400">Theater</span>.</h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-base md:text-lg">
+          Type Markdown on the left. The <em>actual</em> engine — compiled to WebAssembly,
+          running in a worker in your browser — renders it on the right. Flip the switch
+          to typeset the same document as a PDF. No server. No mock. The monster itself.
+        </p>
+      </div>
+
+      <div class="group relative rounded-2xl border border-white/5 bg-black/40 reveal">
+        <div class="absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none z-0">
+          <div class="absolute inset-0 stitch-skin opacity-[0.05]"></div>
+        </div>
+        <!-- corner bolts -->
+        <div class="franken-bolt absolute -left-1.5 -top-1.5 z-30 h-3.5 w-3.5 rounded-full bg-gradient-to-br from-slate-700 via-slate-900 to-black border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_1px_3px_rgba(0,0,0,0.6)] flex items-center justify-center">
+          <div class="h-[60%] w-[1.5px] bg-slate-800 rotate-45 absolute"></div><div class="h-[60%] w-[1.5px] bg-slate-800 -rotate-45 absolute"></div>
+          <svg class="absolute inset-[-6px] w-[calc(100%+12px)] h-[calc(100%+12px)] overflow-visible pointer-events-none" viewBox="0 0 20 20"><path d="M 10,2 Q 13,5 10,10 T 10,18" stroke="#34d399" stroke-width="0.75" fill="none"/><path d="M 2,10 Q 5,13 10,10 T 18,10" stroke="#34d399" stroke-width="0.75" fill="none"/></svg>
+        </div>
+        <div class="franken-bolt absolute -right-1.5 -top-1.5 z-30 h-3.5 w-3.5 rounded-full bg-gradient-to-br from-slate-700 via-slate-900 to-black border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_1px_3px_rgba(0,0,0,0.6)] flex items-center justify-center">
+          <div class="h-[60%] w-[1.5px] bg-slate-800 rotate-45 absolute"></div><div class="h-[60%] w-[1.5px] bg-slate-800 -rotate-45 absolute"></div>
+          <svg class="absolute inset-[-6px] w-[calc(100%+12px)] h-[calc(100%+12px)] overflow-visible pointer-events-none" viewBox="0 0 20 20"><path d="M 10,2 Q 13,5 10,10 T 10,18" stroke="#34d399" stroke-width="0.75" fill="none"/><path d="M 2,10 Q 5,13 10,10 T 18,10" stroke="#34d399" stroke-width="0.75" fill="none"/></svg>
+        </div>
+        <div class="franken-bolt absolute -left-1.5 -bottom-1.5 z-30 h-3.5 w-3.5 rounded-full bg-gradient-to-br from-slate-700 via-slate-900 to-black border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_1px_3px_rgba(0,0,0,0.6)] flex items-center justify-center">
+          <div class="h-[60%] w-[1.5px] bg-slate-800 rotate-45 absolute"></div><div class="h-[60%] w-[1.5px] bg-slate-800 -rotate-45 absolute"></div>
+        </div>
+        <div class="franken-bolt absolute -right-1.5 -bottom-1.5 z-30 h-3.5 w-3.5 rounded-full bg-gradient-to-br from-slate-700 via-slate-900 to-black border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_1px_3px_rgba(0,0,0,0.6)] flex items-center justify-center">
+          <div class="h-[60%] w-[1.5px] bg-slate-800 rotate-45 absolute"></div><div class="h-[60%] w-[1.5px] bg-slate-800 -rotate-45 absolute"></div>
+        </div>
+
+        <div class="relative z-10 glass-modern rounded-2xl overflow-hidden">
+          <!-- Playground chrome -->
+          <div class="flex flex-wrap items-center justify-between gap-3 px-5 md:px-6 py-4 bg-white/5 border-b border-white/5">
+            <div class="flex items-center gap-3">
+              <div class="flex gap-1.5">
+                <div class="h-2.5 w-2.5 rounded-full bg-red-500/40"></div>
+                <div class="h-2.5 w-2.5 rounded-full bg-yellow-500/40"></div>
+                <div class="h-2.5 w-2.5 rounded-full bg-green-500/40"></div>
+              </div>
+              <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">fmd_playground</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <span class="hidden lg:inline text-[8px] font-black text-emerald-500/40 uppercase tracking-[0.2em]">PARITY_100%</span>
+              <span class="hidden lg:inline text-[8px] font-black text-emerald-500/40 uppercase tracking-[0.2em]">DETERMINISM_LOCKED</span>
+              <div class="flex items-center gap-2">
+                <span id="pg-status-dot" class="h-1.5 w-1.5 rounded-full bg-emerald-500/60 animate-pulse"></span>
+                <span id="pg-status" class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em]">REANIMATING…</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="flex flex-wrap items-center gap-3 px-5 md:px-6 py-3 border-b border-white/5 bg-black/30">
+            <div class="flex items-center gap-2" role="group" aria-label="Sample documents">
+              <span class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-600 mr-1">Sample</span>
+              <button data-sample="showcase" aria-pressed="true" class="px-3 py-1.5 rounded-full border border-emerald-500/60 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-emerald-300 hover:border-emerald-500/50 transition-colors">Showcase</button>
+              <button data-sample="code" aria-pressed="false" class="px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:border-emerald-500/50 transition-colors">Code</button>
+              <button data-sample="tables" aria-pressed="false" class="px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:border-emerald-500/50 transition-colors">Tables</button>
+            </div>
+
+            <div class="flex-1"></div>
+
+            <!-- The toggle -->
+            <div class="inline-flex items-center rounded-full border border-emerald-500/25 bg-black/50 p-1" role="group" aria-label="Output format">
+              <button id="pg-toggle-html" aria-pressed="true" class="px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300">HTML</button>
+              <button id="pg-toggle-pdf" aria-pressed="false" class="px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300">PDF</button>
+            </div>
+
+            <div class="flex-1"></div>
+
+            <div class="flex flex-wrap items-center gap-3">
+              <label class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] text-slate-500">
+                Font
+                <select id="pg-font" class="rounded-lg border border-white/10 bg-black/60 px-2 py-1.5 font-mono text-[11px] text-slate-300">
+                  <option value="sans" selected>sans</option>
+                  <option value="serif">serif</option>
+                </select>
+              </label>
+              <label class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] text-slate-500">
+                Dark CSS
+                <select id="pg-dark" class="rounded-lg border border-white/10 bg-black/60 px-2 py-1.5 font-mono text-[11px] text-slate-300">
+                  <option value="auto" selected>auto</option>
+                  <option value="disabled">disabled</option>
+                </select>
+              </label>
+              <label class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] text-slate-500" title="Muted line numbers in PDF code blocks">
+                <input id="pg-linenos" type="checkbox" class="accent-emerald-500"> PDF Line №
+              </label>
+              <button id="pg-download-html" class="px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-slate-300 hover:border-emerald-500/50 hover:text-emerald-300 transition-colors">↓ HTML</button>
+              <button id="pg-download-pdf" class="px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-slate-300 hover:border-emerald-500/50 hover:text-emerald-300 transition-colors">↓ PDF</button>
+            </div>
+          </div>
+
+          <!-- Panes -->
+          <div class="grid lg:grid-cols-2">
+            <div class="border-b lg:border-b-0 lg:border-r border-white/5 flex flex-col">
+              <div class="flex items-center justify-between px-5 py-2.5 bg-white/[0.02] border-b border-white/5">
+                <span class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500">source.md</span>
+                <span id="pg-count" class="font-mono text-[10px] text-slate-600">0 B</span>
+              </div>
+              <div class="pg-editor-wrap h-[420px] lg:h-[600px]">
+                <pre id="pg-highlight" aria-hidden="true"></pre>
+                <textarea id="pg-input" spellcheck="false" autocomplete="off" autocapitalize="off"
+                  aria-label="Markdown source editor"></textarea>
+              </div>
+            </div>
+            <div class="flex flex-col">
+              <div class="flex items-center justify-between px-5 py-2.5 bg-white/[0.02] border-b border-white/5">
+                <span id="pg-preview-label" class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500">self_contained.html</span>
+                <span class="text-[9px] font-black uppercase tracking-[0.25em] text-emerald-500/60">RENDERED_IN_BROWSER</span>
+              </div>
+              <div class="relative h-[420px] lg:h-[600px] bg-[#0c0f0d]">
+                <div id="pg-pane-html" class="absolute inset-0">
+                  <iframe id="pg-html-frame" class="pg-frame" title="Rendered HTML preview" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>
+                </div>
+                <div id="pg-pane-pdf" class="absolute inset-0 hidden">
+                  <iframe id="pg-pdf-frame" class="pg-frame pg-frame-pdf" title="Rendered PDF preview"></iframe>
+                  <div id="pg-pdf-fallback" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-4 p-8 text-center">
+                    <div class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Inline PDF viewing unavailable in this browser</div>
+                    <a id="pg-pdf-fallback-open" href="#" target="_blank" rel="noopener" class="px-6 py-3 rounded-2xl bg-emerald-500 text-black font-black text-sm">OPEN THE PDF</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Diagnostics strip -->
+          <div class="flex flex-wrap items-center gap-x-6 gap-y-2 px-5 md:px-6 py-3 border-t border-white/5 bg-black/40 font-mono text-[11px]">
+            <span class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-600">Diagnostics</span>
+            <span id="pg-diag" class="flex flex-wrap gap-x-4 gap-y-1"></span>
+            <span class="flex-1"></span>
+            <span id="pg-stats" class="text-slate-500"></span>
+          </div>
+        </div>
+      </div>
+      <noscript>
+        <p class="mt-6 text-center text-amber-400 font-mono text-sm">The playground needs JavaScript + WebAssembly. The rest of the page works fine without them.</p>
+      </noscript>
+    </section>
+
+    <!-- ============================== PIPELINE ============================== -->
+    <section id="pipeline" class="relative px-4 md:px-6 py-16 md:py-32 max-w-7xl mx-auto">
+      <div class="text-center mb-12 md:mb-16 reveal">
+        <div class="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-4">
+          <span class="h-px w-8 bg-emerald-500/40"></span>
+          SUBSYSTEM_MAP
+          <span class="h-px w-8 bg-emerald-500/40"></span>
+        </div>
+        <h2 class="text-4xl md:text-6xl font-black tracking-tight mb-5">One <span class="text-emerald-400">AST</span>. Every Organ.</h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-base md:text-lg">
+          Parse once; render everywhere. HTML, PDF, and WASM read the same tree and the
+          same typed theme, so the surfaces can never drift apart. Click a stage to dissect it.
+        </p>
+      </div>
+
+      <div id="viz-pipeline" class="glass-modern dot-grid rounded-3xl p-4 md:p-8 reveal">
+        <svg viewBox="0 0 920 380" class="w-full h-auto" role="img" aria-label="franken_markdown rendering pipeline diagram">
+          <defs>
+            <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L8,4 L0,8 z" fill="rgba(16,185,129,0.55)"/>
+            </marker>
+          </defs>
+
+          <!-- connectors -->
+          <path id="p-src-parse" d="M 170 190 L 216 190" class="flow-line" stroke="rgba(16,185,129,0.45)" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <path id="p-parse-ast" d="M 396 190 L 442 190" class="flow-line" stroke="rgba(16,185,129,0.45)" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <path id="p-ast-html" d="M 600 168 C 650 130, 660 90, 706 72" class="flow-line" stroke="rgba(16,185,129,0.45)" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <path id="p-ast-pdf" d="M 600 190 L 706 190" class="flow-line" stroke="rgba(16,185,129,0.45)" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <path id="p-ast-wasm" d="M 600 212 C 650 250, 660 290, 706 308" class="flow-line" stroke="rgba(16,185,129,0.45)" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <path d="M 521 258 L 521 226" class="flow-line" stroke="rgba(251,191,36,0.4)" stroke-width="1.2" fill="none" marker-end="url(#arrow)"/>
+
+          <!-- traveling pulses -->
+          <circle class="pipeline-pulse" r="3" fill="#34d399" opacity="0.9">
+            <animateMotion dur="4.5s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1">
+              <mpath href="#p-ast-pdf"/>
+            </animateMotion>
+          </circle>
+          <circle class="pipeline-pulse" r="3" fill="#34d399" opacity="0.7">
+            <animateMotion dur="4.5s" begin="1.5s" repeatCount="indefinite">
+              <mpath href="#p-ast-html"/>
+            </animateMotion>
+          </circle>
+          <circle class="pipeline-pulse" r="3" fill="#34d399" opacity="0.7">
+            <animateMotion dur="4.5s" begin="3s" repeatCount="indefinite">
+              <mpath href="#p-ast-wasm"/>
+            </animateMotion>
+          </circle>
+
+          <!-- stages -->
+          <g data-stage="source" class="pipeline-stage" tabindex="0" role="button" aria-label="Markdown source stage">
+            <rect x="20" y="160" width="150" height="60" rx="12"/>
+            <text x="95" y="185" text-anchor="middle" class="stage-title">markdown</text>
+            <text x="95" y="203" text-anchor="middle" class="stage-sub">file · stdin · string</text>
+          </g>
+          <g data-stage="parser" class="pipeline-stage" tabindex="0" role="button" aria-label="Parser stage">
+            <rect x="220" y="160" width="176" height="60" rx="12"/>
+            <text x="308" y="185" text-anchor="middle" class="stage-title">clean-room parser</text>
+            <text x="308" y="203" text-anchor="middle" class="stage-sub">byte-level scanner</text>
+          </g>
+          <g data-stage="ast" class="pipeline-stage" tabindex="0" role="button" aria-label="AST stage">
+            <rect x="446" y="160" width="150" height="60" rx="12"/>
+            <text x="521" y="185" text-anchor="middle" class="stage-title">document AST</text>
+            <text x="521" y="203" text-anchor="middle" class="stage-sub">one parse, many bodies</text>
+          </g>
+          <g class="pipeline-theme">
+            <rect x="446" y="262" width="150" height="44" rx="10" fill="rgba(251,191,36,0.05)" stroke="rgba(251,191,36,0.35)" stroke-width="1"/>
+            <text x="521" y="282" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="800" font-family="var(--font-mono)">theme model</text>
+            <text x="521" y="297" text-anchor="middle" fill="rgba(251,191,36,0.6)" font-size="9" font-family="var(--font-mono)">colors · spacing · page</text>
+          </g>
+          <g data-stage="html" class="pipeline-stage" tabindex="0" role="button" aria-label="HTML emitter stage">
+            <rect x="710" y="42" width="190" height="60" rx="12"/>
+            <text x="805" y="67" text-anchor="middle" class="stage-title">HTML emitter</text>
+            <text x="805" y="85" text-anchor="middle" class="stage-sub">self-contained page</text>
+          </g>
+          <g data-stage="pdf" class="pipeline-stage" tabindex="0" role="button" aria-label="PDF writer stage">
+            <rect x="710" y="160" width="190" height="60" rx="12"/>
+            <text x="805" y="185" text-anchor="middle" class="stage-title">layout + PDF writer</text>
+            <text x="805" y="203" text-anchor="middle" class="stage-sub">Knuth–Plass · tagged</text>
+          </g>
+          <g data-stage="wasm" class="pipeline-stage" tabindex="0" role="button" aria-label="WASM ABI stage">
+            <rect x="710" y="278" width="190" height="60" rx="12"/>
+            <text x="805" y="303" text-anchor="middle" class="stage-title">WASM ABI</text>
+            <text x="805" y="321" text-anchor="middle" class="stage-sub">this page, right now</text>
+          </g>
+        </svg>
+
+        <div class="mt-6 md:mt-8 glass-modern rounded-2xl p-6 md:p-8">
+          <h3 id="pipeline-detail-title" class="text-xl md:text-2xl font-black text-emerald-300 mb-3"></h3>
+          <p id="pipeline-detail-body" class="text-slate-400 leading-relaxed mb-4 max-w-3xl"></p>
+          <div id="pipeline-detail-facts" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== FEATURES ============================== -->
+    <section id="features" class="relative px-4 md:px-6 py-16 md:py-32 max-w-7xl mx-auto">
+      <div class="text-center mb-12 md:mb-16 reveal">
+        <div class="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-4">
+          <span class="h-px w-8 bg-emerald-500/40"></span>
+          VITAL_ORGANS
+          <span class="h-px w-8 bg-emerald-500/40"></span>
+        </div>
+        <h2 class="text-4xl md:text-6xl font-black tracking-tight mb-5">Built <span class="text-emerald-400">Different</span>.</h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-base md:text-lg">
+          Every organ in the render path — parser, highlighter, font reader, line breaker,
+          compressor, PDF writer — was grown in this lab, for this exact workflow.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+        <div class="kinetic-card glass-modern rounded-3xl p-8 reveal">
+          <div class="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center mb-6">
+            <svg class="h-6 w-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+          </div>
+          <h3 class="text-lg font-black mb-2">One AST, Two Bodies</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">HTML and PDF render from the same parse and the same typed theme. Colors, spacing, code styling, and document rhythm stay coherent across surfaces — structurally, not by convention.</p>
+        </div>
+        <div class="kinetic-card glass-modern rounded-3xl p-8 reveal">
+          <div class="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center mb-6">
+            <svg class="h-6 w-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+          </div>
+          <h3 class="text-lg font-black mb-2">Zero-Dependency Core</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">No comrak, no syntect, no PDF crates, no regex engine. The engine compiles with zero third-party crates (<code class="text-emerald-300">clap</code> exists only for the CLI), enforced by a CI policy gate. Tiny audit surface, fast builds.</p>
+        </div>
+        <div class="kinetic-card glass-modern rounded-3xl p-8 reveal">
+          <div class="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center mb-6">
+            <svg class="h-6 w-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+          </div>
+          <h3 class="text-lg font-black mb-2">Deterministic Bytes</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">Fixed input + fixed options = identical output bytes, across runs and operating systems. <code class="text-emerald-300">SOURCE_DATE_EPOCH</code> pins PDF dates; CI diffs repeated renders byte-for-byte. Perfect for reproducible builds and caching.</p>
+        </div>
+        <div class="kinetic-card glass-modern rounded-3xl p-8 reveal">
+          <div class="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center mb-6">
+            <svg class="h-6 w-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+          </div>
+          <h3 class="text-lg font-black mb-2">LaTeX-Grade Typography</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">Knuth–Plass optimal paragraph breaking, Liang hyphenation, real font metrics, GPOS kerning, GSUB ligatures, and measured-column tables. PDF output that reads like it was typeset, because it was.</p>
+        </div>
+        <div class="kinetic-card glass-modern rounded-3xl p-8 reveal">
+          <div class="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center mb-6">
+            <svg class="h-6 w-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <h3 class="text-lg font-black mb-2">Clean-Room Highlighter</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">Rust, Python, JS/TS, JSON, shell, PowerShell, Go, C/C++, TOML, YAML, SQL, HTML/SVG, CSS, Markdown, and Mermaid — one hand-written highlighting model shared by HTML and PDF. Diagram-shaped ASCII keeps its geometry.</p>
+        </div>
+        <div class="kinetic-card glass-modern rounded-3xl p-8 reveal">
+          <div class="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center mb-6">
+            <svg class="h-6 w-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01M6 18h.01"/></svg>
+          </div>
+          <h3 class="text-lg font-black mb-2">Agent-First CLI</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">The first command an agent guesses works: <code class="text-emerald-300">fmd README.md</code>. Stdout is data, stderr is diagnostics, exit codes are stable, and <code class="text-emerald-300">capabilities --json</code>, <code class="text-emerald-300">doctor --json</code>, and <code class="text-emerald-300">robot-docs</code> expose the whole contract.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== TYPOGRAPHY / KNUTH-PLASS ============================== -->
+    <section id="typography" class="relative px-4 md:px-6 py-16 md:py-32 max-w-7xl mx-auto">
+      <div class="text-center mb-12 md:mb-16 reveal">
+        <div class="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-4">
+          <span class="h-px w-8 bg-emerald-500/40"></span>
+          TYPE_LAB
+          <span class="h-px w-8 bg-emerald-500/40"></span>
+        </div>
+        <h2 class="text-4xl md:text-6xl font-black tracking-tight mb-5">Typeset Like <span class="text-emerald-400">TeX</span>.</h2>
+        <p class="text-slate-400 max-w-3xl mx-auto text-base md:text-lg">
+          Word processors break lines greedily: fill until full, wrap, repeat — and one bad
+          line poisons the paragraph. franken_markdown's PDF path uses the Knuth–Plass
+          <em>total-fit</em> algorithm: it considers every possible set of breakpoints and picks
+          the one that minimizes ugliness across the whole paragraph. This demo runs both
+          algorithms live. Drag the measure and watch the line tinting: the hotter a line, the
+          more its spaces were stretched or squeezed.
+        </p>
+      </div>
+
+      <div id="viz-knuth" class="glass-modern rounded-3xl p-6 md:p-10 reveal">
+        <div class="flex flex-wrap items-center gap-4 mb-8">
+          <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">Line width</span>
+          <input id="kp-slider" type="range" min="280" max="560" value="492" step="4" class="w-56 md:w-80 accent-emerald-500">
+          <span id="kp-width-label" class="font-mono text-xs text-emerald-400">492px measure</span>
+          <span class="flex-1"></span>
+          <span id="kp-verdict" class="font-mono text-xs text-amber-300"></span>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-8">
+          <div>
+            <div class="flex items-center gap-2 mb-4">
+              <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+              <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Greedy (first-fit) — what most tools do</span>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-white/5 bg-black/40 p-4">
+              <div id="kp-greedy" class="space-y-0.5 text-slate-200"></div>
+            </div>
+            <div id="kp-greedy-stats" class="mt-3 font-mono text-[11px] text-slate-500"></div>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 mb-4">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></span>
+              <span class="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-400">Knuth–Plass (total-fit) — what fmd does</span>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-emerald-500/15 bg-black/40 p-4">
+              <div id="kp-optimal" class="space-y-0.5 text-slate-200"></div>
+            </div>
+            <div id="kp-optimal-stats" class="mt-3 font-mono text-[11px] text-slate-500"></div>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-4 mt-8 text-[10px] font-black uppercase tracking-[0.15em]">
+          <span class="inline-flex items-center gap-2 text-slate-500"><span class="h-2.5 w-5 rounded-sm bg-emerald-500/20 border border-emerald-500/30"></span> comfortable spacing</span>
+          <span class="inline-flex items-center gap-2 text-slate-500"><span class="h-2.5 w-5 rounded-sm bg-amber-400/25 border border-amber-400/30"></span> stretched</span>
+          <span class="inline-flex items-center gap-2 text-slate-500"><span class="h-2.5 w-5 rounded-sm bg-red-500/25 border border-red-500/30"></span> abused</span>
+          <span class="text-slate-600 normal-case font-medium tracking-normal">— hover any line for its adjustment ratio and badness. Same font, same words, same widths; only the breakpoints differ.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== FONT SUBSETTING ============================== -->
+    <section class="relative px-4 md:px-6 py-16 md:py-32 max-w-7xl mx-auto">
+      <div class="grid lg:grid-cols-[1fr_1.4fr] gap-12 items-center">
+        <div class="reveal">
+          <div class="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-4">
+            <span class="h-px w-8 bg-emerald-500/40"></span>
+            FONT_SURGERY
+          </div>
+          <h2 class="text-4xl md:text-5xl font-black tracking-tight mb-6">Only the <span class="text-emerald-400">Glyphs</span> You Use.</h2>
+          <p class="text-slate-400 leading-relaxed mb-6">
+            Both output bodies embed real fonts — but never whole ones. The clean-room
+            TrueType reader walks <code class="text-emerald-300">cmap</code>, <code class="text-emerald-300">glyf</code> and
+            <code class="text-emerald-300">loca</code>, keeps exactly the outlines your document touches,
+            and rebuilds a valid font. That's how a fully typeset PDF of the project README —
+            embedded fonts, kerning, ligatures and all — lands around 58&nbsp;KB.
+          </p>
+          <p class="text-slate-500 text-sm leading-relaxed mb-8">
+            Type below and watch the subset grow glyph by glyph. Deterministic ordering means
+            the same document always produces the same font bytes.
+          </p>
+          <input id="subset-input" type="text" value="It's alive! Rendered by franken_markdown."
+            class="w-full rounded-2xl border border-emerald-500/25 bg-black/50 px-5 py-4 font-mono text-sm text-emerald-100 placeholder:text-slate-600 focus:border-emerald-500/60"
+            placeholder="Type something…" aria-label="Text to subset">
+        </div>
+        <div id="viz-subset" class="glass-modern rounded-3xl p-6 md:p-8 reveal">
+          <div class="flex items-center justify-between mb-5">
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">Glyph inventory (printable ASCII)</span>
+            <span class="font-mono text-xs text-emerald-400"><span id="subset-kept">0 / 94</span> kept</span>
+          </div>
+          <div id="subset-grid" class="grid gap-1.5 mb-8" style="grid-template-columns: repeat(auto-fill, minmax(26px, 1fr)); grid-auto-rows: 28px;"></div>
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between font-mono text-[10px] text-slate-500 mb-1"><span>full face on disk</span><span>269 KB</span></div>
+              <div class="h-3 rounded-full bg-white/5 overflow-hidden"><div id="subset-bar-full" class="h-full rounded-full bg-slate-600/60" style="width: 100%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between font-mono text-[10px] text-emerald-400/80 mb-1"><span>embedded subset</span><span id="subset-bytes"></span></div>
+              <div class="h-3 rounded-full bg-white/5 overflow-hidden"><div id="subset-bar-sub" class="h-full rounded-full bg-gradient-to-r from-[#004225] to-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.4)] transition-all duration-500" style="width: 2%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== DEPENDENCIES ============================== -->
+    <section class="relative px-4 md:px-6 py-16 md:py-32 max-w-7xl mx-auto">
+      <div class="text-center mb-12 md:mb-16 reveal">
+        <div class="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-4">
+          <span class="h-px w-8 bg-emerald-500/40"></span>
+          AUDIT_SURFACE
+          <span class="h-px w-8 bg-emerald-500/40"></span>
+        </div>
+        <h2 class="text-4xl md:text-6xl font-black tracking-tight mb-5">No Organ <span class="text-emerald-400">Donors</span>.</h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-base md:text-lg">
+          Assemble a Markdown→HTML+PDF pipeline the usual way and you inherit a dependency
+          forest — parser, regex engine, syntax themes, font stack, PDF library, image codecs.
+          Every crate is code you now ship, audit, and trust. The monster grows its own organs.
+        </p>
+      </div>
+
+      <div id="viz-deps" class="grid lg:grid-cols-2 gap-6 reveal">
+        <div class="glass-modern rounded-3xl p-6 md:p-8 border-red-500/10">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-red-400/80">The usual stack</span>
+            <span class="font-mono text-xs text-slate-500"><span class="text-red-400 text-lg font-black tabular-nums" data-count-to="36">36</span>+ crates</span>
+          </div>
+          <svg id="deps-left-svg" viewBox="0 0 460 380" class="w-full h-auto" role="img" aria-label="Typical dependency graph: dozens of third-party crates"></svg>
+          <p class="mt-4 text-xs text-slate-500 font-mono">comrak + syntect + a PDF crate, resolved transitively. Each node: someone else's unsafe review queue.</p>
+        </div>
+        <div class="glass-modern rounded-3xl p-6 md:p-8 border-emerald-500/20 glow-green">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-400">franken_markdown</span>
+            <span class="font-mono text-xs text-slate-500"><span class="text-emerald-400 text-lg font-black tabular-nums">0</span> crates</span>
+          </div>
+          <svg viewBox="0 0 460 380" class="w-full h-auto" role="img" aria-label="franken_markdown dependency graph: a single self-contained node">
+            <circle cx="230" cy="190" r="150" fill="none" stroke="rgba(16,185,129,0.08)" stroke-width="1"/>
+            <circle cx="230" cy="190" r="100" fill="none" stroke="rgba(16,185,129,0.10)" stroke-width="1"/>
+            <circle cx="230" cy="190" r="46" fill="rgba(16,185,129,0.10)" stroke="rgba(16,185,129,0.7)" stroke-width="1.5" style="filter: drop-shadow(0 0 18px rgba(16,185,129,0.35))"/>
+            <text x="230" y="186" text-anchor="middle" fill="#6ee7b7" font-size="12" font-weight="800" font-family="var(--font-mono)">franken_</text>
+            <text x="230" y="202" text-anchor="middle" fill="#6ee7b7" font-size="12" font-weight="800" font-family="var(--font-mono)">markdown</text>
+            <line x1="271" y1="152" x2="344" y2="96" stroke="rgba(148,163,184,0.3)" stroke-width="1" stroke-dasharray="4 4"/>
+            <circle cx="360" cy="84" r="16" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.35)" stroke-width="1" stroke-dasharray="4 4"/>
+            <text x="360" y="88" text-anchor="middle" fill="rgba(148,163,184,0.7)" font-size="9" font-family="var(--font-mono)">clap</text>
+            <text x="360" y="116" text-anchor="middle" fill="rgba(148,163,184,0.45)" font-size="8" font-family="var(--font-mono)">CLI only, never in core/wasm</text>
+            <text x="230" y="330" text-anchor="middle" fill="rgba(110,231,183,0.5)" font-size="9" font-family="var(--font-mono)">parser · highlighter · fonts · layout · SVG · DEFLATE · PDF — all in-tree</text>
+          </svg>
+          <p class="mt-4 text-xs text-slate-500 font-mono">One codebase. <code>cargo tree</code> proof gated in CI; <code>unsafe</code> forbidden at the crate level.</p>
+        </div>
+      </div>
+
+      <!-- Comparison table -->
+      <div class="glass-modern rounded-3xl overflow-hidden mt-10 reveal">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm min-w-[760px]">
+            <thead>
+              <tr class="border-b border-white/10 text-left">
+                <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">Approach</th>
+                <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.25em] text-emerald-400">franken_markdown</th>
+                <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">Headless Chrome</th>
+                <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">Pandoc + LaTeX</th>
+                <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">comrak + syntect + PDF crate</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5 text-slate-400">
+              <tr>
+                <td class="px-6 py-4 font-bold text-slate-300">Install weight</td>
+                <td class="px-6 py-4 text-emerald-300">one small binary / 1.5 MB wasm</td>
+                <td class="px-6 py-4">a whole browser</td>
+                <td class="px-6 py-4">Haskell + TeX distribution</td>
+                <td class="px-6 py-4">large crate forest</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4 font-bold text-slate-300">PDF typography</td>
+                <td class="px-6 py-4 text-emerald-300">Knuth–Plass, kerning, ligatures, tagged</td>
+                <td class="px-6 py-4">browser print pipeline</td>
+                <td class="px-6 py-4">excellent (TeX)</td>
+                <td class="px-6 py-4">whatever the crate does</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4 font-bold text-slate-300">Deterministic bytes</td>
+                <td class="px-6 py-4 text-emerald-300">yes, CI-enforced</td>
+                <td class="px-6 py-4">no</td>
+                <td class="px-6 py-4">with effort</td>
+                <td class="px-6 py-4">rarely</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4 font-bold text-slate-300">Runs in the browser</td>
+                <td class="px-6 py-4 text-emerald-300">yes — this page</td>
+                <td class="px-6 py-4">it is the browser</td>
+                <td class="px-6 py-4">no</td>
+                <td class="px-6 py-4">partially</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4 font-bold text-slate-300">Third-party code in the render path</td>
+                <td class="px-6 py-4 text-emerald-300">zero crates</td>
+                <td class="px-6 py-4">millions of lines</td>
+                <td class="px-6 py-4">very large</td>
+                <td class="px-6 py-4">dozens of crates</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="text-center text-xs text-slate-600 mt-4 font-mono reveal">Honest tradeoff: a browser out-renders arbitrary CSS and Pandoc converts more formats. fmd trades breadth for focus, determinism, and a surface you can actually audit.</p>
+    </section>
+
+    <!-- ============================== INSTALL ============================== -->
+    <section id="install" class="relative px-4 md:px-6 py-16 md:py-32 max-w-5xl mx-auto">
+      <div class="text-center mb-12 md:mb-16 reveal">
+        <div class="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-4">
+          <span class="h-px w-8 bg-emerald-500/40"></span>
+          REANIMATION_PROTOCOL
+          <span class="h-px w-8 bg-emerald-500/40"></span>
+        </div>
+        <h2 class="text-4xl md:text-6xl font-black tracking-tight mb-5">Get <span class="text-emerald-400">Stitched</span> In.</h2>
+      </div>
+
+      <div class="space-y-5">
+        <div class="glass-modern rounded-2xl overflow-hidden reveal">
+          <div class="flex items-center justify-between px-6 py-3 bg-white/5 border-b border-white/5">
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">cargo (released CLI)</span>
+            <button data-copy="cargo install franken_markdown" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-emerald-400 transition-colors">COPY</button>
+          </div>
+          <pre class="px-6 py-5 font-mono text-sm overflow-x-auto"><span class="text-emerald-500 font-bold">$</span> <span class="text-white">cargo install franken_markdown</span></pre>
+        </div>
+
+        <div class="glass-modern rounded-2xl overflow-hidden reveal">
+          <div class="flex items-center justify-between px-6 py-3 bg-white/5 border-b border-white/5">
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">one-liner (checksum-verified binaries)</span>
+            <button data-copy="curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/franken_markdown/main/install.sh | bash" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-emerald-400 transition-colors">COPY</button>
+          </div>
+          <pre class="px-6 py-5 font-mono text-sm overflow-x-auto"><span class="text-emerald-500 font-bold">$</span> <span class="text-white">curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/franken_markdown/main/install.sh | bash</span></pre>
+        </div>
+
+        <div class="glass-modern rounded-2xl overflow-hidden reveal">
+          <div class="flex items-center justify-between px-6 py-3 bg-white/5 border-b border-white/5">
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">first commands</span>
+            <button data-copy="fmd README.md --to both --out README.html" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-emerald-400 transition-colors">COPY</button>
+          </div>
+          <pre class="px-6 py-5 font-mono text-sm overflow-x-auto leading-relaxed"><span class="text-emerald-500 font-bold">$</span> <span class="text-white">fmd README.md --out README.html</span>          <span class="text-slate-600"># self-contained HTML</span>
+<span class="text-emerald-500 font-bold">$</span> <span class="text-white">fmd README.md --to pdf --out README.pdf</span>   <span class="text-slate-600"># compact tagged PDF</span>
+<span class="text-emerald-500 font-bold">$</span> <span class="text-white">fmd README.md --to both --out README.html</span> <span class="text-slate-600"># one parse, both bodies</span>
+<span class="text-emerald-500 font-bold">$</span> <span class="text-white">fmd capabilities --json</span>                   <span class="text-slate-600"># the machine-readable contract</span></pre>
+        </div>
+
+        <div class="glass-modern rounded-2xl overflow-hidden reveal">
+          <div class="flex items-center justify-between px-6 py-3 bg-white/5 border-b border-white/5">
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">browser (the API powering this page)</span>
+            <button data-copy='import { createRenderer } from "./franken_markdown.js";
+
+const fmd = await createRenderer();
+const html = await fmd.renderHtml("# Hello", { font: "sans" });
+const pdf  = await fmd.renderPdf("# Report", { metadataEpochSeconds: 1700000000 });' class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-emerald-400 transition-colors">COPY</button>
+          </div>
+          <pre class="px-6 py-5 font-mono text-sm overflow-x-auto leading-relaxed"><span class="text-slate-500">import</span> <span class="text-white">{ createRenderer }</span> <span class="text-slate-500">from</span> <span class="text-amber-300">"./franken_markdown.js"</span>;
+
+<span class="text-slate-500">const</span> <span class="text-emerald-300">fmd</span>  = <span class="text-slate-500">await</span> <span class="text-white">createRenderer</span>();
+<span class="text-slate-500">const</span> <span class="text-emerald-300">html</span> = <span class="text-slate-500">await</span> <span class="text-white">fmd.renderHtml</span>(<span class="text-amber-300">"# Hello"</span>, { font: <span class="text-amber-300">"sans"</span> });
+<span class="text-slate-500">const</span> <span class="text-emerald-300">pdf</span>  = <span class="text-slate-500">await</span> <span class="text-white">fmd.renderPdf</span>(<span class="text-amber-300">"# Report"</span>, { metadataEpochSeconds: <span class="text-amber-300">1700000000</span> });</pre>
+        </div>
+      </div>
+
+      <!-- Lab notes: honesty strip -->
+      <div class="mt-14 rounded-2xl border border-amber-400/15 bg-amber-400/[0.03] p-6 md:p-8 reveal">
+        <div class="text-[10px] font-black uppercase tracking-[0.3em] text-amber-400/80 mb-4">LAB_NOTES · Honest scar tissue</div>
+        <ul class="grid md:grid-cols-2 gap-x-8 gap-y-2 text-sm text-slate-400 list-disc list-inside">
+          <li>CommonMark coverage is partial and measured: 379/652 examples (64.1% of in-scope; raw-HTML passthrough is an intentional non-goal) — a CI-ratcheted floor.</li>
+          <li>The npm package <code class="text-amber-300/80">@franken-suite/franken-markdown</code> is build-checked and publish-ready, but not on npm yet.</li>
+          <li>PDF pagination is still maturing: keep-with-next and repeatable table headers work; full widow/orphan control is roadmap.</li>
+          <li>SVG support is practical, not browser-complete — unsupported constructs surface as structured render warnings, never silent lies.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================== FOOTER ============================== -->
+    <footer class="relative px-4 md:px-6 pb-12 pt-8 max-w-7xl mx-auto">
+      <div class="group relative rounded-2xl border border-white/5 bg-black/40">
+        <div class="absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none">
+          <div class="absolute inset-0 stitch-skin opacity-[0.05]"></div>
+          <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-emerald-500/5 blur-[100px]"></div>
+        </div>
+        <div class="relative z-10 glass-modern rounded-2xl p-10 md:p-16 border-emerald-500/10">
+          <div class="grid md:grid-cols-[1.5fr_1fr_1fr] gap-10">
+            <div>
+              <div class="flex items-center gap-3 mb-4">
+                <div class="h-8 w-8 rounded-lg bg-emerald-500 flex items-center justify-center font-mono font-black text-black">F</div>
+                <span class="font-black tracking-tight">franken_markdown</span>
+              </div>
+              <p class="text-sm text-slate-500 leading-relaxed max-w-sm mb-6">
+                The monster Markdown engine for Rust. One clean-room core; beautiful HTML,
+                LaTeX-grade PDF, and first-class WASM — deterministic to the byte.
+              </p>
+              <div class="flex flex-col gap-2">
+                <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></span>
+                  All Systems Operational
+                </div>
+                <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500/50"></span>
+                  Renderer v0.3.0 Active
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-5">Project</div>
+              <div class="flex flex-col gap-3 text-sm">
+                <a href="https://github.com/Dicklesworthstone/franken_markdown" target="_blank" rel="noopener" class="text-slate-400 hover:text-emerald-400 transition-colors">GitHub Repository</a>
+                <a href="https://crates.io/crates/franken_markdown" target="_blank" rel="noopener" class="text-slate-400 hover:text-emerald-400 transition-colors">crates.io</a>
+                <a href="https://github.com/Dicklesworthstone/franken_markdown/releases" target="_blank" rel="noopener" class="text-slate-400 hover:text-emerald-400 transition-colors">Release Binaries</a>
+                <a href="https://github.com/Dicklesworthstone/franken_markdown/issues" target="_blank" rel="noopener" class="text-slate-400 hover:text-emerald-400 transition-colors">Report a Bug</a>
+              </div>
+            </div>
+            <div>
+              <div class="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-5">On This Page</div>
+              <div class="flex flex-col gap-3 text-sm">
+                <a href="#playground" class="text-slate-400 hover:text-emerald-400 transition-colors">Live Playground</a>
+                <a href="#pipeline" class="text-slate-400 hover:text-emerald-400 transition-colors">The Pipeline</a>
+                <a href="#typography" class="text-slate-400 hover:text-emerald-400 transition-colors">Knuth–Plass Lab</a>
+                <button id="back-to-top" class="text-left text-slate-400 hover:text-emerald-400 transition-colors">Back to Top ↑</button>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-4 mt-12 pt-8 border-t border-white/5">
+            <span class="text-xs text-slate-600">© <span id="year">2026</span> Jeffrey Emanuel. MIT License (with OpenAI/Anthropic rider).</span>
+            <span class="text-[10px] font-black uppercase tracking-[0.5em] text-white/5">IT RENDERS. IT'S ALIVE.</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script type="module" src="assets/js/main.js"></script>
+  <script type="module" src="assets/js/playground.js"></script>
+</body>
+</html>

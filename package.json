@@ -1,0 +1,18 @@
+{
+  "name": "franken_markdown_website",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "css": "tailwindcss -i dev/tailwind.css -o assets/css/site.css --minify",
+    "css:watch": "tailwindcss -i dev/tailwind.css -o assets/css/site.css --watch",
+    "serve": "python3 -m http.server 8899"
+  },
+  "devDependencies": {
+    "@fontsource-variable/inter": "^5.2.8",
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "@tailwindcss/cli": "^4.3.2",
+    "mri": "^1.2.0",
+    "playwright-core": "^1.61.1",
+    "tailwindcss": "^4.3.2"
+  }
+}

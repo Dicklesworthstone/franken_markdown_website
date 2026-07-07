@@ -1,0 +1,473 @@
+/* franken_markdown.com — design system source (compiled by Tailwind v4 CLI to assets/css/site.css)
+   Visual language ported from frankentui.com ("Laboratory of Beautiful Monsters"),
+   re-keyed to British Racing Green. */
+
+@import "tailwindcss";
+
+@source "../index.html";
+@source "../assets/js";
+
+/* ------------------------------------------------------------------ */
+/* Tokens                                                              */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
+
+  --tracking-tightest: -0.04em;
+  --tracking-tighter: -0.02em;
+  --tracking-tight: -0.01em;
+
+  /* British Racing Green palette */
+  --color-bg: #020a06;
+  --color-bg-deep: #010503;
+  --color-surface: #06140d;
+  --color-border: rgba(16, 185, 129, 0.1);
+  --color-green-prime: #10b981;
+  --color-green-glow: #34d399;
+  --color-green-light: #6ee7b7;
+  --color-brg: #004225;
+  --color-gold: #fbbf24;
+  --color-monster-red: #ef4444;
+
+  --shadow-franken: 0 0 40px -10px rgba(16, 185, 129, 0.2);
+
+  --ease-stripe: cubic-bezier(0.19, 1, 0.22, 1);
+  --duration-fast: 200ms;
+  --duration-normal: 400ms;
+  --duration-slow: 700ms;
+}
+
+/* ------------------------------------------------------------------ */
+/* Fonts (self-hosted, latin variable subsets)                         */
+/* ------------------------------------------------------------------ */
+
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../fonts/inter-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+@font-face {
+  font-family: "JetBrains Mono Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url("../fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: #f1f5f9;
+  font-family: var(--font-sans);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  letter-spacing: var(--tracking-tight);
+  overflow-x: hidden;
+}
+
+/* Ambient atmosphere: BRG radial pools + top-to-bottom darkening */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 12%, rgba(16, 185, 129, 0.05), transparent 45%),
+    radial-gradient(circle at 85% 30%, rgba(0, 66, 37, 0.28), transparent 50%),
+    radial-gradient(circle at 40% 95%, rgba(251, 191, 36, 0.03), transparent 40%),
+    linear-gradient(to bottom, var(--color-bg), var(--color-bg-deep));
+}
+
+/* Film grain */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27120%27%20height%3D%27120%27%3E%3Cfilter%20id%3D%27n%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.85%27%20numOctaves%3D%272%27%20stitchTiles%3D%27stitch%27%20seed%3D%272%27/%3E%3C/filter%3E%3Crect%20width%3D%27120%27%20height%3D%27120%27%20filter%3D%27url(%23n)%27/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 9999;
+  contain: strict;
+}
+
+h1, h2, h3, h4 {
+  letter-spacing: var(--tracking-tighter);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+code, pre, kbd {
+  font-family: var(--font-mono);
+  letter-spacing: 0;
+}
+
+::selection {
+  background: rgba(16, 185, 129, 0.3);
+  color: #fff;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-bg-deep); }
+::-webkit-scrollbar-thumb {
+  background: #163a28;
+  border: 2px solid var(--color-bg-deep);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-green-prime); }
+
+:focus-visible {
+  outline: 2px solid var(--color-green-prime);
+  outline-offset: 4px;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-green-prime);
+  color: black;
+  padding: 1rem 2rem;
+  z-index: 10000;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  border-radius: 0 0 1rem 1rem;
+  transition: top 0.3s var(--ease-stripe);
+}
+.skip-link:focus { top: 0; outline: none; }
+
+/* ------------------------------------------------------------------ */
+/* Materials                                                           */
+/* ------------------------------------------------------------------ */
+
+.glass-modern {
+  background: rgba(6, 20, 13, 0.8);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border: 1px solid rgba(16, 185, 129, 0.12);
+  box-shadow:
+    0 4px 24px -1px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+.kinetic-card {
+  transition: transform var(--duration-normal) var(--ease-stripe),
+    border-color var(--duration-normal) var(--ease-stripe),
+    box-shadow var(--duration-normal) var(--ease-stripe),
+    background var(--duration-normal) var(--ease-stripe);
+}
+.kinetic-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: var(--shadow-franken);
+}
+
+.glow-green { box-shadow: 0 0 40px rgba(16, 185, 129, 0.15); }
+
+.text-gradient-franken {
+  background: linear-gradient(135deg, #6ee7b7 0%, #a7f3d0 45%, #34d399 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-animate-green {
+  background: linear-gradient(to right, #34d399, #a7f3d0, #10b981, #34d399);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: textGradient 8s linear infinite;
+}
+
+@keyframes textGradient { to { background-position: 300% center; } }
+
+/* Stitched cross-hatch skin for FrankenContainer interiors */
+.stitch-skin {
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0z' fill='none'/%3E%3Cpath d='M10 0v5M10 15v10M10 35v5M30 0v5M30 15v10M30 35v5M0 10h5M15 10h10M35 10h5M0 30h5M15 30h10M35 30h5' stroke='%23ffffff' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: 80px 80px;
+}
+
+/* Dot grid for visualization benches */
+.dot-grid {
+  background-image: radial-gradient(circle at 1px 1px, rgba(16, 185, 129, 0.14) 1px, transparent 0);
+  background-size: 36px 36px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Motion                                                              */
+/* ------------------------------------------------------------------ */
+
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1.5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+.animate-float { animation: float 6s ease-in-out infinite; }
+
+@keyframes borderBeam {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.border-beam-host { position: relative; overflow: hidden; }
+.border-beam {
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  background: conic-gradient(from 0deg, transparent 0deg, rgba(16, 185, 129, 0.12) 180deg, transparent 360deg);
+  animation: borderBeam 6s linear infinite;
+}
+
+/* Slow-drifting glow orbs (Web-Animations-free, pure CSS) */
+@keyframes orbDrift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(6vw, -4vh, 0) scale(1.08); }
+  66% { transform: translate3d(-5vw, 5vh, 0) scale(0.94); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+.glow-orb {
+  position: fixed;
+  z-index: -1;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(120px);
+  will-change: transform;
+  animation: orbDrift 26s ease-in-out infinite;
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.9s var(--ease-stripe), transform 0.9s var(--ease-stripe);
+}
+
+/* Glitch (vanilla port of franken-glitch.tsx) */
+.franken-glitch {
+  position: relative;
+  display: inline-block;
+  transform: translateZ(0);
+}
+.franken-glitch::before,
+.franken-glitch::after {
+  content: attr(data-glitch);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.franken-glitch.glitching {
+  animation: glitchJitter 0.2s steps(2, end) infinite;
+}
+.franken-glitch.glitching::before {
+  color: rgba(239, 68, 68, 0.35);
+  clip-path: inset(0 0 65% 0);
+  opacity: 1;
+  animation: glitchSliceA 0.24s steps(2, end) infinite;
+}
+.franken-glitch.glitching::after {
+  color: rgba(34, 211, 238, 0.35);
+  clip-path: inset(65% 0 0 0);
+  opacity: 1;
+  animation: glitchSliceB 0.24s steps(2, end) infinite reverse;
+}
+@keyframes glitchJitter {
+  0% { transform: translate(0, 0); text-shadow: none; }
+  25% { transform: translate(-3px, 1px); text-shadow: 3px 0 rgba(255, 0, 0, 0.5), -3px 0 rgba(0, 255, 255, 0.5); }
+  50% { transform: translate(3px, -1px); text-shadow: -3px 0 rgba(255, 0, 0, 0.5), 3px 0 rgba(0, 255, 255, 0.5); }
+  75% { transform: translate(-1px, 2px); text-shadow: 2px 0 rgba(255, 0, 0, 0.4), -2px 0 rgba(0, 255, 255, 0.4); }
+  100% { transform: translate(0, 0); text-shadow: none; }
+}
+@keyframes glitchSliceA {
+  0% { transform: translateX(-6px); }
+  100% { transform: translateX(6px); }
+}
+@keyframes glitchSliceB {
+  0% { transform: translateX(6px); }
+  100% { transform: translateX(-6px); }
+}
+
+/* Bolt arc flicker */
+.franken-bolt svg { opacity: 0; }
+.franken-bolt:hover svg { animation: arcFlicker 0.5s linear infinite; }
+@keyframes arcFlicker {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  45% { opacity: 0.4; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Terminal caret */
+@keyframes caretBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.caret-blink { animation: caretBlink 1s step-end infinite; }
+
+/* Pipeline stage nodes */
+.pipeline-stage { cursor: pointer; outline: none; }
+.pipeline-stage rect {
+  fill: rgba(255, 255, 255, 0.02);
+  stroke: rgba(16, 185, 129, 0.3);
+  stroke-width: 1.2;
+  transition: fill var(--duration-normal) var(--ease-stripe),
+    stroke var(--duration-normal) var(--ease-stripe),
+    filter var(--duration-normal) var(--ease-stripe);
+}
+.pipeline-stage .stage-title {
+  fill: #d7ece1;
+  font-size: 13px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+}
+.pipeline-stage .stage-sub {
+  fill: rgba(148, 163, 184, 0.75);
+  font-size: 9.5px;
+  font-family: var(--font-mono);
+}
+.pipeline-stage:hover rect,
+.pipeline-stage:focus-visible rect {
+  stroke: rgba(16, 185, 129, 0.55);
+  fill: rgba(16, 185, 129, 0.05);
+}
+.pipeline-stage.pipeline-active rect {
+  fill: rgba(16, 185, 129, 0.1);
+  stroke: rgba(16, 185, 129, 0.85);
+  filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.35));
+}
+.pipeline-stage.pipeline-active .stage-title { fill: #6ee7b7; }
+
+/* Pipeline flow dashes */
+.flow-line {
+  stroke-dasharray: 6 8;
+  animation: dashFlow 1.4s linear infinite;
+}
+@keyframes dashFlow { to { stroke-dashoffset: -14; } }
+
+/* ------------------------------------------------------------------ */
+/* Playground editor                                                   */
+/* ------------------------------------------------------------------ */
+
+.pg-editor-wrap {
+  position: relative;
+  min-height: 0;
+}
+.pg-editor-wrap textarea,
+.pg-editor-wrap pre {
+  margin: 0;
+  border: 0;
+  width: 100%;
+  height: 100%;
+  padding: 1.25rem 1.5rem 4rem;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  letter-spacing: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  tab-size: 2;
+  overflow: auto;
+  background: transparent;
+}
+.pg-editor-wrap pre {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  color: #b7cfc2;
+}
+.pg-editor-wrap textarea {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  resize: none;
+  color: transparent;
+  background: transparent;
+  caret-color: var(--color-green-glow);
+  outline: none;
+}
+.pg-editor-wrap textarea::selection {
+  background: rgba(16, 185, 129, 0.25);
+  color: transparent;
+}
+
+/* Markdown token colors (editor overlay) */
+.md-marker { color: #4e6f5e; }
+.md-h { color: var(--color-green-glow); font-weight: 700; }
+.md-bold { color: #f8fafc; font-weight: 700; }
+.md-em { color: #d5e8dd; font-style: italic; }
+.md-code { color: var(--color-gold); }
+.md-fence { color: #59806c; }
+.md-codeblock { color: #9fbfae; }
+.md-link { color: var(--color-green-light); text-decoration: underline; text-decoration-color: rgba(110, 231, 183, 0.4); }
+.md-url { color: #59806c; }
+.md-quote { color: #8fb3a0; font-style: italic; }
+.md-hr { color: #4e6f5e; font-weight: 700; }
+.md-task { color: var(--color-gold); }
+
+/* Preview iframes */
+.pg-frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #ffffff;
+}
+.pg-frame.pg-frame-pdf { background: #0c0f0d; }
+
+/* Knuth-Plass lines */
+.kp-line {
+  position: relative;
+  white-space: nowrap;
+  border-radius: 4px;
+}
+.kp-line > span { display: inline-block; }
+
+/* ------------------------------------------------------------------ */
+/* Reduced motion                                                      */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .animate-float,
+  .border-beam,
+  .glow-orb,
+  .flow-line,
+  .franken-glitch.glitching,
+  .franken-glitch.glitching::before,
+  .franken-glitch.glitching::after,
+  .caret-blink,
+  .franken-bolt:hover svg {
+    animation: none !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+  .text-animate-green { animation: none; }
+  .kinetic-card:hover { transform: none; }
+  .pipeline-pulse { display: none; }
+}
