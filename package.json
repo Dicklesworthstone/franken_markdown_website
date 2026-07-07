@@ -13,6 +13,7 @@
     "@tailwindcss/cli": "^4.3.2",
     "mri": "^1.2.0",
     "playwright-core": "^1.61.1",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4.3.2"
   }
 }
