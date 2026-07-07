@@ -265,6 +265,11 @@ function initKnuth() {
 
   slider.addEventListener("input", update);
   update();
+  // Measurements taken before the webfont finished loading used fallback
+  // metrics; re-measure once fonts settle (update() is idempotent).
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(update).catch(() => {});
+  }
 }
 
 /* ================================================================== */

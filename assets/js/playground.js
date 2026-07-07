@@ -2,7 +2,7 @@
    Left: syntax-highlighted Markdown editor (textarea + overlay).
    Right: HTML or PDF rendered by the franken_markdown wasm core in a worker. */
 
-import { highlightMarkdown } from "./md-highlight.js";
+import { highlightMarkdown } from "./md-highlight.js?v=4";
 
 const SAMPLES = {
   showcase: `# FrankenMarkdown
@@ -189,18 +189,28 @@ function parseFragment() {
   };
 }
 
+/* Returns { doc } on success, { error } when a document param was present but
+   could not be decoded (so callers can say so instead of silently showing the
+   default sample), and {} when the fragment carries no document at all. */
 async function decodeFragmentDoc(frag) {
-  try {
-    if (frag.zdoc && typeof DecompressionStream !== "undefined") {
-      return new TextDecoder().decode(await pipeBytes(b64urlDecode(frag.zdoc), DecompressionStream, "deflate-raw"));
+  if (frag.zdoc != null) {
+    if (typeof DecompressionStream === "undefined") {
+      return { error: "This browser cannot decompress this share link (no CompressionStream support). Ask the sender to re-share from a browser without compression, or open the link in a current browser." };
     }
-    if (frag.doc) {
-      return new TextDecoder().decode(b64urlDecode(frag.doc));
+    try {
+      return { doc: new TextDecoder().decode(await pipeBytes(b64urlDecode(frag.zdoc), DecompressionStream, "deflate-raw")) };
+    } catch {
+      return { error: "The document in this share link is corrupted or truncated (some chat apps shorten long URLs). Ask the sender for the full link." };
     }
-  } catch {
-    return null;
   }
-  return null;
+  if (frag.doc != null) {
+    try {
+      return { doc: new TextDecoder().decode(b64urlDecode(frag.doc)) };
+    } catch {
+      return { error: "The document in this share link is corrupted or truncated (some chat apps shorten long URLs). Ask the sender for the full link." };
+    }
+  }
+  return {};
 }
 
 if (els.input) {
@@ -239,11 +249,19 @@ function bootPlayground() {
     const frag = parseFragment();
     if (frag.view === "max") setMaximized(true);
     if (frag.fmt === "pdf") setFormat("pdf");
-    const doc = await decodeFragmentDoc(frag);
-    if (doc !== null) {
-      els.input.value = doc;
+    const result = await decodeFragmentDoc(frag);
+    if (result.doc !== undefined) {
+      els.input.value = result.doc;
       refreshEditor();
       docVersion += 1;
+      clearSampleChips();
+    } else if (result.error) {
+      // Make the failure visible in the document itself: a silent fallback to
+      // the sample would look like the sender shared the wrong thing.
+      els.input.value = `# This share link did not decode\n\n${result.error}\n`;
+      refreshEditor();
+      docVersion += 1;
+      clearSampleChips();
     }
   })();
 
@@ -282,6 +300,12 @@ function bootPlayground() {
   worker.onerror = (event) => {
     setStatus("dead", "WORKER ERROR");
     showFatal(`Render worker error: ${event.message || "unknown"}`);
+    // Fail any in-flight renders/downloads instead of leaving their promises
+    // pending forever.
+    for (const [, resolver] of pendingResolvers) {
+      resolver.reject(new Error("render worker crashed"));
+    }
+    pendingResolvers.clear();
   };
 
   function workerRender(format, markdown, options) {
@@ -324,7 +348,7 @@ function bootPlayground() {
         if (activeFormat === format) present(format, res);
         setStatus("alive", "IT'S ALIVE");
       } catch (error) {
-        setStatus("alive", "RENDER FAILED");
+        setStatus("busy", "RENDER FAILED");
         showDiagnostics([{ severity: "error", start: 0, end: 0, message: error.message }]);
       }
       if (docVersion !== version) state.dirty = true;
@@ -439,6 +463,27 @@ function bootPlayground() {
     els.maximize.querySelector(".pg-max-icon-expand").classList.toggle("hidden", on);
     els.maximize.querySelector(".pg-max-icon-collapse").classList.toggle("hidden", !on);
     els.maximize.querySelector(".pg-max-label").textContent = on ? "Exit" : "Maximize";
+    // Keep the rest of the page out of the tab order / accessibility tree
+    // while the playground overlays it (no-op where inert is unsupported).
+    for (const node of document.querySelectorAll("#site-header, #mobile-menu, footer, main > section:not(#playground), #playground > :not(#pg-root)")) {
+      node.toggleAttribute("inert", on);
+    }
+    // Exiting should also retire a #view=max fragment, or the next reload
+    // (and any link copied from the address bar) re-maximizes unexpectedly.
+    if (!on && window.location.hash.includes("view=max")) {
+      const params = new URLSearchParams(window.location.hash.slice(1));
+      params.delete("view");
+      const rest = params.toString();
+      history.replaceState(null, "", rest === "" ? window.location.pathname : `#${rest}`);
+    }
+  }
+
+  function clearSampleChips() {
+    for (const chip of document.querySelectorAll("[data-sample]")) {
+      chip.setAttribute("aria-pressed", "false");
+      chip.classList.remove("border-emerald-500/60", "text-emerald-300");
+      chip.classList.add("text-slate-400");
+    }
   }
 
   /* Build a link that carries the document in the URL fragment: no server,
@@ -481,7 +526,27 @@ function bootPlayground() {
   /* Download filename: the document's first heading, lowercased with
      underscores for spaces — "# My Great Doc" downloads as my_great_doc.pdf. */
   function docFilenameBase() {
-    const src = els.input.value;
+    // Search outside fenced code blocks so a `# comment` inside a bash fence
+    // never becomes the filename.
+    const lines = els.input.value.split("\n");
+    let inFence = false;
+    let fenceMarker = "";
+    const kept = [];
+    for (const line of lines) {
+      const fence = line.match(/^\s*(```+|~~~+)/);
+      if (fence) {
+        if (!inFence) {
+          inFence = true;
+          fenceMarker = fence[1][0];
+        } else if (fence[1][0] === fenceMarker) {
+          inFence = false;
+        }
+        kept.push("");
+        continue;
+      }
+      kept.push(inFence ? "" : line);
+    }
+    const src = kept.join("\n");
     let title = null;
     const atx = src.match(/^[ \t]{0,3}#{1,6}[ \t]+(.+?)[ \t]*#*[ \t]*$/m);
     if (atx) {
@@ -522,7 +587,9 @@ function bootPlayground() {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 4000);
+    // Generous delay: "ask where to save" dialogs can hold the blob open far
+    // longer than a few seconds. One document's bytes are cheap to keep.
+    window.setTimeout(() => URL.revokeObjectURL(url), 120000);
   }
 
   /* --- wire events --- */
@@ -538,7 +605,9 @@ function bootPlayground() {
   }, { passive: true });
 
   els.input.addEventListener("keydown", (event) => {
-    if (event.key === "Tab") {
+    // Plain Tab indents; Shift+Tab (and modified Tab) stays a focus move so
+    // keyboard users are never trapped in the editor.
+    if (event.key === "Tab" && !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
       event.preventDefault();
       els.input.setRangeText("  ", els.input.selectionStart, els.input.selectionEnd, "end");
       refreshEditor();
@@ -560,11 +629,17 @@ function bootPlayground() {
       const frag = parseFragment();
       if (frag.view === "max") setMaximized(true);
       if (frag.fmt === "pdf") setFormat("pdf");
-      const doc = await decodeFragmentDoc(frag);
-      if (doc !== null && doc !== els.input.value) {
+      const result = await decodeFragmentDoc(frag);
+      const doc = result.doc !== undefined
+        ? result.doc
+        : result.error
+          ? `# This share link did not decode\n\n${result.error}\n`
+          : undefined;
+      if (doc !== undefined && doc !== els.input.value) {
         els.input.value = doc;
         refreshEditor();
         docVersion += 1;
+        clearSampleChips();
         ensureLive(activeFormat);
       }
     })();

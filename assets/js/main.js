@@ -1,7 +1,7 @@
 /* Site chrome: header state, scroll reveals, glitch text, the monster eye,
    hero terminal typing, count-up stats, copy buttons. */
 
-import { animateCount } from "./viz.js";
+import { animateCount } from "./viz.js?v=4";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 

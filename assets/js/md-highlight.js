@@ -18,12 +18,20 @@ function span(cls, text) {
 /* Inline tokens: code spans, bold, italic, links, autolinks. Order matters —
    code spans win over emphasis, per CommonMark. This is a display heuristic,
    not a conformant parser; the real parser lives in the wasm module. */
+
+// Matchers only ever see a bounded window and the next-special scan uses a
+// sticky global regex on the original string, so adversarial lines (walls of
+// backticks/brackets arriving via #doc= share links) stay linear instead of
+// freezing the main thread on every keystroke.
+const MATCH_WINDOW = 2200;
+const NEXT_SPECIAL = /[`*_[<~!]/g;
+
 function highlightInline(text) {
   let out = "";
   let i = 0;
   const n = text.length;
   while (i < n) {
-    const rest = text.slice(i);
+    const rest = text.slice(i, i + MATCH_WINDOW);
 
     // Inline code: `...` (single backtick runs only; good enough for display)
     const code = rest.match(/^(`+)([^`]|[^`][\s\S]*?[^`])\1(?!`)/);
@@ -77,10 +85,12 @@ function highlightInline(text) {
       continue;
     }
 
-    // Plain run up to the next candidate special character
-    const next = rest.slice(1).search(/[`*_[<~!]/);
-    const take = next === -1 ? rest.length : next + 1;
-    out += esc(rest.slice(0, take));
+    // Plain run up to the next candidate special character (scanned on the
+    // original string via lastIndex — no per-iteration tail copies).
+    NEXT_SPECIAL.lastIndex = i + 1;
+    const m = NEXT_SPECIAL.exec(text);
+    const take = m === null ? n - i : m.index - i;
+    out += esc(text.slice(i, i + take));
     i += take;
   }
   return out;
@@ -94,6 +104,13 @@ export function highlightMarkdown(source) {
   let fenceMarker = "";
 
   for (const line of lines) {
+    // Pathological single lines (only plausible via adversarial share links)
+    // render as plain escaped text rather than risking a slow tokenize.
+    if (line.length > 20000) {
+      out.push(inFence ? span("md-codeblock", line) : esc(line));
+      continue;
+    }
+
     // Fence open/close
     const fence = line.match(/^(\s*)(```+|~~~+)(.*)$/);
     if (fence) {

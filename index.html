@@ -18,8 +18,9 @@
   <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/site.css?v=3">
-  <link rel="modulepreload" href="assets/wasm/0.3.1/franken_markdown.js">
-  <link rel="modulepreload" href="assets/wasm/0.3.1/pkg/franken_markdown.js">
+  <!-- modulepreload would not reach the worker's separate module map; preload
+       the actual long pole (the wasm binary, fetched by the bindgen glue). -->
+  <link rel="preload" href="assets/wasm/0.3.1/pkg/franken_markdown_bg.wasm" as="fetch" crossorigin>
 </head>
 <body class="min-h-screen">
   <a href="#playground" class="skip-link">Skip to the playground</a>

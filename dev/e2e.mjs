@@ -147,6 +147,24 @@ await reader.screenshot({ path: "dev/screenshots/09-shared-link.png" });
 await reader.close();
 await page.evaluate(() => history.replaceState(null, "", "#"));
 
+// Deep link: #fmt=pdf plus an uncompressed unicode #doc= payload.
+const unicodeMd = "# Ünïcode → tëst 🧟\n\nvia plain doc= param.";
+const docParam = Buffer.from(unicodeMd, "utf8").toString("base64")
+  .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const deep = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await deep.goto(`http://localhost:8899/#fmt=pdf&doc=${docParam}`, { waitUntil: "networkidle" });
+await deep.waitForFunction(() => document.getElementById("pg-pdf-frame")?.src.startsWith("blob:"), null, { timeout: 45000 }).catch(() => {});
+const deepState = await deep.evaluate(() => ({
+  pdfVisible: !document.getElementById("pg-pane-pdf").classList.contains("hidden"),
+  pdfChipStyled: document.getElementById("pg-toggle-pdf").classList.contains("bg-emerald-500"),
+  htmlChipStyled: document.getElementById("pg-toggle-html").classList.contains("bg-emerald-500"),
+  doc: document.getElementById("pg-input").value
+}));
+check("fmt=pdf deep link opens pdf pane", deepState.pdfVisible && deepState.pdfChipStyled && !deepState.htmlChipStyled,
+  `chips pdf=${deepState.pdfChipStyled} html=${deepState.htmlChipStyled}`);
+check("plain doc= carries unicode", deepState.doc.includes("Ünïcode → tëst 🧟"));
+await deep.close();
+
 // Visualizations init.
 await page.locator("#pipeline").scrollIntoViewIfNeeded();
 await page.waitForTimeout(700);
