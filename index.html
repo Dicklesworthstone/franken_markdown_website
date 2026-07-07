@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>franken_markdown — The Monster Markdown Engine</title>
+  <title>FrankenMarkdown — The Monster Markdown Engine</title>
   <meta name="description" content="A clean-room, zero-dependency Rust engine that renders Markdown to beautiful self-contained HTML and compact tagged PDF — natively and in your browser via WASM, byte-for-byte identical. Try it live.">
   <meta name="theme-color" content="#020a06">
   <link rel="canonical" href="https://franken-markdown.com/">
-  <meta property="og:title" content="franken_markdown — The Monster Markdown Engine">
+  <meta property="og:title" content="FrankenMarkdown — The Monster Markdown Engine">
   <meta property="og:description" content="Markdown → polished HTML + LaTeX-grade PDF from one auditable Rust core. Zero dependencies. WASM first-class. Rendered live in your browser.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://franken-markdown.com/">
@@ -17,7 +17,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23020a06'/%3E%3Crect width='64' height='64' rx='14' fill='none' stroke='%2310b981' stroke-opacity='0.5' stroke-width='2'/%3E%3Ctext x='32' y='44' font-family='monospace' font-size='36' font-weight='900' fill='%2334d399' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E">
   <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="assets/css/site.css">
+  <link rel="stylesheet" href="assets/css/site.css?v=3">
   <link rel="modulepreload" href="assets/wasm/franken_markdown.js">
   <link rel="modulepreload" href="assets/wasm/pkg/franken_markdown.js">
 </head>
@@ -45,7 +45,7 @@
         </div>
       </div>
       <div class="leading-none">
-        <div class="font-black tracking-tight text-sm md:text-base">franken_markdown</div>
+        <div class="font-black tracking-tight text-sm md:text-base">FrankenMarkdown</div>
         <div class="text-[7px] font-black text-emerald-500 uppercase tracking-widest animate-pulse mt-1">RENDERER_ALIVE</div>
       </div>
     </a>
@@ -394,7 +394,7 @@
       </div>
 
       <div id="viz-pipeline" class="glass-modern dot-grid rounded-3xl p-4 md:p-8 reveal">
-        <svg viewBox="0 0 920 380" class="w-full h-auto" role="img" aria-label="franken_markdown rendering pipeline diagram">
+        <svg viewBox="0 0 920 380" class="w-full h-auto" role="img" aria-label="FrankenMarkdown rendering pipeline diagram">
           <defs>
             <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0,0 L8,4 L0,8 z" fill="rgba(16,185,129,0.55)"/>
@@ -544,7 +544,7 @@
         <h2 class="text-4xl md:text-6xl font-black tracking-tight mb-5">Typeset Like <span class="text-emerald-400">TeX</span>.</h2>
         <p class="text-slate-400 max-w-3xl mx-auto text-base md:text-lg">
           Word processors break lines greedily: fill until full, wrap, repeat — and one bad
-          line poisons the paragraph. franken_markdown's PDF path uses the Knuth–Plass
+          line poisons the paragraph. FrankenMarkdown's PDF path uses the Knuth–Plass
           <em>total-fit</em> algorithm: it considers every possible set of breakpoints and picks
           the one that minimizes ugliness across the whole paragraph. This demo runs both
           algorithms live. Drag the measure and watch the line tinting: the hotter a line, the
@@ -611,7 +611,7 @@
             Type below and watch the subset grow glyph by glyph. Deterministic ordering means
             the same document always produces the same font bytes.
           </p>
-          <input id="subset-input" type="text" value="It's alive! Rendered by franken_markdown."
+          <input id="subset-input" type="text" value="It's alive! Rendered by FrankenMarkdown."
             class="w-full rounded-2xl border border-emerald-500/25 bg-black/50 px-5 py-4 font-mono text-sm text-emerald-100 placeholder:text-slate-600 focus:border-emerald-500/60"
             placeholder="Type something…" aria-label="Text to subset">
         </div>
@@ -665,7 +665,7 @@
             <span class="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-400">franken_markdown</span>
             <span class="font-mono text-xs text-slate-500"><span class="text-emerald-400 text-lg font-black tabular-nums">0</span> crates</span>
           </div>
-          <svg viewBox="0 0 460 380" class="w-full h-auto" role="img" aria-label="franken_markdown dependency graph: a single self-contained node">
+          <svg viewBox="0 0 460 380" class="w-full h-auto" role="img" aria-label="FrankenMarkdown dependency graph: a single self-contained node">
             <circle cx="230" cy="190" r="150" fill="none" stroke="rgba(16,185,129,0.08)" stroke-width="1"/>
             <circle cx="230" cy="190" r="100" fill="none" stroke="rgba(16,185,129,0.10)" stroke-width="1"/>
             <circle cx="230" cy="190" r="46" fill="rgba(16,185,129,0.10)" stroke="rgba(16,185,129,0.7)" stroke-width="1.5" style="filter: drop-shadow(0 0 18px rgba(16,185,129,0.35))"/>
@@ -688,7 +688,7 @@
             <thead>
               <tr class="border-b border-white/10 text-left">
                 <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">Approach</th>
-                <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.25em] text-emerald-400">franken_markdown</th>
+                <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.25em] text-emerald-400">FrankenMarkdown</th>
                 <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">Headless Chrome</th>
                 <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">Pandoc + LaTeX</th>
                 <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">comrak + syntect + PDF crate</th>
@@ -825,7 +825,7 @@ const pdf  = await fmd.renderPdf("# Report", { metadataEpochSeconds: 1700000000 
             <div>
               <div class="flex items-center gap-3 mb-4">
                 <div class="h-8 w-8 rounded-lg bg-emerald-500 flex items-center justify-center font-mono font-black text-black">F</div>
-                <span class="font-black tracking-tight">franken_markdown</span>
+                <span class="font-black tracking-tight">FrankenMarkdown</span>
               </div>
               <p class="text-sm text-slate-500 leading-relaxed max-w-sm mb-6">
                 The monster Markdown engine for Rust. One clean-room core; beautiful HTML,
@@ -871,7 +871,7 @@ const pdf  = await fmd.renderPdf("# Report", { metadataEpochSeconds: 1700000000 
     </footer>
   </main>
 
-  <script type="module" src="assets/js/main.js"></script>
-  <script type="module" src="assets/js/playground.js"></script>
+  <script type="module" src="assets/js/main.js?v=3"></script>
+  <script type="module" src="assets/js/playground.js?v=3"></script>
 </body>
 </html>

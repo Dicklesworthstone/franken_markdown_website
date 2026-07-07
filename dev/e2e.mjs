@@ -30,7 +30,7 @@ page.on("console", (msg) => {
 page.on("pageerror", (err) => consoleErrors.push(String(err)));
 
 await page.goto("http://localhost:8899/", { waitUntil: "networkidle" });
-check("page loads", (await page.title()).includes("franken_markdown"));
+check("page loads", /frankenmarkdown/i.test(await page.title()));
 
 // Wait for the wasm worker to come alive and render the first HTML preview.
 await page.waitForFunction(
@@ -96,6 +96,22 @@ await page.waitForFunction(
 const sampleOk = await page.evaluate(() =>
   document.getElementById("pg-html-frame").srcdoc.includes("clean-room highlighter"));
 check("sample chip swaps document", sampleOk);
+
+// Download filenames derive from the document's first heading.
+await page.locator("[data-sample='showcase']").click();
+await page.waitForTimeout(300);
+const dl1 = page.waitForEvent("download");
+await page.locator("#pg-download-html").click();
+const dlHtml = await dl1;
+check("html download named from title", dlHtml.suggestedFilename() === "frankenmarkdown.html", dlHtml.suggestedFilename());
+await page.locator("#pg-input").fill("# My Great Doc!\n\nBody.");
+await page.waitForTimeout(300);
+const dl2 = page.waitForEvent("download");
+await page.locator("#pg-download-pdf").click();
+const dlPdf = await dl2;
+check("pdf download slugs the title", dlPdf.suggestedFilename() === "my_great_doc.pdf", dlPdf.suggestedFilename());
+await page.locator("[data-sample='code']").click();
+await page.waitForTimeout(400);
 
 // Maximize mode.
 await page.locator("#pg-maximize").click();

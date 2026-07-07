@@ -1,15 +1,15 @@
 # Cloudflare Pages headers. GitHub Pages ignores this file (see .nojekyll).
+#
+# Assets deliberately use max-age=0 + must-revalidate rather than long TTLs:
+# these URLs are not content-fingerprinted, and long edge TTLs outlive Pages'
+# deploy purge on custom domains (stale-JS incidents). ETag revalidation makes
+# repeat loads a handful of cheap 304s while staying correct on every deploy.
 
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-
-/index.html
   Cache-Control: public, max-age=0, must-revalidate
-
-/assets/*
-  Cache-Control: public, max-age=86400
 
 /assets/wasm/pkg/franken_markdown_bg.wasm
   Content-Type: application/wasm
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=0, must-revalidate

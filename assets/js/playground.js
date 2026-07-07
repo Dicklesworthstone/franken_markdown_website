@@ -5,7 +5,7 @@
 import { highlightMarkdown } from "./md-highlight.js";
 
 const SAMPLES = {
-  showcase: `# franken_markdown
+  showcase: `# FrankenMarkdown
 
 A **clean-room, zero-dependency** Rust engine that turns Markdown into a
 gorgeous self-contained HTML page *and* a professional-typography PDF — with
@@ -478,6 +478,30 @@ function bootPlayground() {
     }
   }
 
+  /* Download filename: the document's first heading, lowercased with
+     underscores for spaces — "# My Great Doc" downloads as my_great_doc.pdf. */
+  function docFilenameBase() {
+    const src = els.input.value;
+    let title = null;
+    const atx = src.match(/^[ \t]{0,3}#{1,6}[ \t]+(.+?)[ \t]*#*[ \t]*$/m);
+    if (atx) {
+      title = atx[1];
+    } else {
+      const setext = src.match(/^[ \t]{0,3}(\S[^\n]*)\n[ \t]{0,3}=+[ \t]*$/m);
+      if (setext) title = setext[1];
+    }
+    if (!title) return "franken-playground";
+    const slug = title
+      .replace(/['’]/g, "")
+      .replace(/[`*_~]/g, "")
+      .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, "_")
+      .replace(/^_+|_+$/g, "");
+    return slug || "franken-playground";
+  }
+
   async function download(format) {
     const cached = presented[format];
     let res;
@@ -494,7 +518,7 @@ function bootPlayground() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `franken-playground.${format}`;
+    link.download = `${docFilenameBase()}.${format}`;
     document.body.appendChild(link);
     link.click();
     link.remove();
