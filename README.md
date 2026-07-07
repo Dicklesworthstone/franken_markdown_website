@@ -40,7 +40,9 @@ Modules + WASM require http(s) — `file://` will not work.
 
 ## Refreshing the WASM artifacts
 
-The wasm package is built and verified by the engine repo's official gate
+The site ships the same package that is published to npm as
+[`@franken-suite/franken-markdown`](https://www.npmjs.com/package/@franken-suite/franken-markdown).
+It is built and verified by the engine repo's official gate
 (native ↔ wasm byte parity + size budget):
 
 ```bash

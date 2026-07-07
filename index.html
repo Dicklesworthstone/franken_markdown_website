@@ -744,14 +744,22 @@
 
         <div class="glass-modern rounded-2xl overflow-hidden reveal">
           <div class="flex items-center justify-between px-6 py-3 bg-white/5 border-b border-white/5">
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">npm (browser / bundler package)</span>
+            <button data-copy="npm install @franken-suite/franken-markdown" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-emerald-400 transition-colors">COPY</button>
+          </div>
+          <pre class="px-6 py-5 font-mono text-sm overflow-x-auto leading-relaxed"><span class="text-emerald-500 font-bold">$</span> <span class="text-white">npm install @franken-suite/franken-markdown</span>   <span class="text-slate-600"># or: bun add @franken-suite/franken-markdown</span></pre>
+        </div>
+
+        <div class="glass-modern rounded-2xl overflow-hidden reveal">
+          <div class="flex items-center justify-between px-6 py-3 bg-white/5 border-b border-white/5">
             <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">browser (the API powering this page)</span>
-            <button data-copy='import { createRenderer } from "./franken_markdown.js";
+            <button data-copy='import { createRenderer } from "@franken-suite/franken-markdown";
 
 const fmd = await createRenderer();
 const html = await fmd.renderHtml("# Hello", { font: "sans" });
 const pdf  = await fmd.renderPdf("# Report", { metadataEpochSeconds: 1700000000 });' class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-emerald-400 transition-colors">COPY</button>
           </div>
-          <pre class="px-6 py-5 font-mono text-sm overflow-x-auto leading-relaxed"><span class="text-slate-500">import</span> <span class="text-white">{ createRenderer }</span> <span class="text-slate-500">from</span> <span class="text-amber-300">"./franken_markdown.js"</span>;
+          <pre class="px-6 py-5 font-mono text-sm overflow-x-auto leading-relaxed"><span class="text-slate-500">import</span> <span class="text-white">{ createRenderer }</span> <span class="text-slate-500">from</span> <span class="text-amber-300">"@franken-suite/franken-markdown"</span>;
 
 <span class="text-slate-500">const</span> <span class="text-emerald-300">fmd</span>  = <span class="text-slate-500">await</span> <span class="text-white">createRenderer</span>();
 <span class="text-slate-500">const</span> <span class="text-emerald-300">html</span> = <span class="text-slate-500">await</span> <span class="text-white">fmd.renderHtml</span>(<span class="text-amber-300">"# Hello"</span>, { font: <span class="text-amber-300">"sans"</span> });
@@ -764,7 +772,7 @@ const pdf  = await fmd.renderPdf("# Report", { metadataEpochSeconds: 1700000000 
         <div class="text-[10px] font-black uppercase tracking-[0.3em] text-amber-400/80 mb-4">LAB_NOTES · Honest scar tissue</div>
         <ul class="grid md:grid-cols-2 gap-x-8 gap-y-2 text-sm text-slate-400 list-disc list-inside">
           <li>CommonMark coverage is partial and measured: 379/652 examples (64.1% of in-scope; raw-HTML passthrough is an intentional non-goal) — a CI-ratcheted floor.</li>
-          <li>The npm package <code class="text-amber-300/80">@franken-suite/franken-markdown</code> is build-checked and publish-ready, but not on npm yet.</li>
+          <li>The npm package <a href="https://www.npmjs.com/package/@franken-suite/franken-markdown" target="_blank" rel="noopener" class="text-amber-300/80 underline decoration-amber-300/30 hover:text-amber-200"><code>@franken-suite/franken-markdown</code></a> ships the exact parity-gated build this page runs; browser visual/golden fixtures are still early.</li>
           <li>PDF pagination is still maturing: keep-with-next and repeatable table headers work; full widow/orphan control is roadmap.</li>
           <li>SVG support is practical, not browser-complete — unsupported constructs surface as structured render warnings, never silent lies.</li>
         </ul>
@@ -805,6 +813,7 @@ const pdf  = await fmd.renderPdf("# Report", { metadataEpochSeconds: 1700000000 
               <div class="flex flex-col gap-3 text-sm">
                 <a href="https://github.com/Dicklesworthstone/franken_markdown" target="_blank" rel="noopener" class="text-slate-400 hover:text-emerald-400 transition-colors">GitHub Repository</a>
                 <a href="https://crates.io/crates/franken_markdown" target="_blank" rel="noopener" class="text-slate-400 hover:text-emerald-400 transition-colors">crates.io</a>
+                <a href="https://www.npmjs.com/package/@franken-suite/franken-markdown" target="_blank" rel="noopener" class="text-slate-400 hover:text-emerald-400 transition-colors">npm Package</a>
                 <a href="https://github.com/Dicklesworthstone/franken_markdown/releases" target="_blank" rel="noopener" class="text-slate-400 hover:text-emerald-400 transition-colors">Release Binaries</a>
                 <a href="https://github.com/Dicklesworthstone/franken_markdown/issues" target="_blank" rel="noopener" class="text-slate-400 hover:text-emerald-400 transition-colors">Report a Bug</a>
               </div>
