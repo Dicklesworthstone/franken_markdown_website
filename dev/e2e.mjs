@@ -1,5 +1,8 @@
 /* Headless end-to-end check of the site + wasm playground.
-   Run: bun dev/e2e.mjs  (expects the site served at http://localhost:8899) */
+   Run: bun dev/e2e.mjs [base-url]
+   Default base is http://localhost:8899/ (use `bun run serve`); pass a URL to
+   run the same suite against a deployment, e.g.
+   bun dev/e2e.mjs https://franken-markdown.com/ */
 
 import { chromium } from "playwright-core";
 import { existsSync } from "node:fs";
