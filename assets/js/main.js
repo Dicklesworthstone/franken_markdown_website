@@ -158,7 +158,7 @@ if (terminal) {
   const LINES = [
     { text: "$ fmd README.md --to both --out README.html", cls: "cmd" },
     { text: "  parse: 1 document -> 1 AST", cls: "out" },
-    { text: "  README.html   89,632 B  self-contained", cls: "out" },
+    { text: "  README.html   90,364 B  self-contained", cls: "out" },
     { text: "  README.pdf    58,387 B  tagged, deterministic", cls: "out" },
     { text: "$ sha256sum README.pdf   # render it twice - same bytes", cls: "cmd" },
     { text: "  7037ebbd8f7c63da...  README.pdf", cls: "out" }
@@ -237,6 +237,7 @@ function whenSeen(el, run) {
 for (const button of document.querySelectorAll("[data-copy]")) {
   button.addEventListener("click", async () => {
     const text = button.dataset.copy;
+    if (button.textContent === "COPIED") return; // double-click would capture "COPIED" as the restore text
     try {
       await navigator.clipboard.writeText(text);
       const original = button.textContent;
