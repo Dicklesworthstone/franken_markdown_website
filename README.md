@@ -178,6 +178,14 @@ Consequence: **whenever an asset's content changes, bump its `?v=` query in
 `index.html`** (and in module import specifiers if the file is imported).
 The e2e suite's desktop-chrome check exists to catch a stale stylesheet.
 
+After deploying, verify **content**, not headers — a header poll is satisfied
+by the previous deployment during the propagation window:
+
+```bash
+until bun run verify:live; do sleep 10; done   # sha-compares every live asset
+bun dev/e2e.mjs https://franken-markdown.com/  # then the full suite
+```
+
 ---
 
 ## Refreshing the WASM Artifacts
