@@ -465,7 +465,7 @@ function bootPlayground() {
     els.maximize.querySelector(".pg-max-label").textContent = on ? "Exit" : "Maximize";
     // Keep the rest of the page out of the tab order / accessibility tree
     // while the playground overlays it (no-op where inert is unsupported).
-    for (const node of document.querySelectorAll("#site-header, #mobile-menu, footer, main > section:not(#playground), #playground > :not(#pg-root)")) {
+    for (const node of document.querySelectorAll("body > .skip-link, #site-header, #mobile-menu, footer, main > section:not(#playground), #playground > :not(#pg-root)")) {
       node.toggleAttribute("inert", on);
     }
     // Exiting should also retire a #view=max fragment, or the next reload
@@ -664,6 +664,9 @@ function bootPlayground() {
         other.setAttribute("aria-pressed", String(other === chip));
         other.classList.toggle("border-emerald-500/60", other === chip);
         other.classList.toggle("text-emerald-300", other === chip);
+        // Keep the color classes mutually exclusive; both present would leave
+        // the winner to stylesheet order.
+        other.classList.toggle("text-slate-400", other !== chip);
       }
     });
   }

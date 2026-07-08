@@ -10,6 +10,12 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Cache-Control: public, max-age=0, must-revalidate
 
+# Belt-and-braces wasm MIME (Pages already maps .wasm; other hosts may not).
+# Add a rule per version dir when refreshing the engine bundle.
 /assets/wasm/pkg/franken_markdown_bg.wasm
+  Content-Type: application/wasm
+  Cache-Control: public, max-age=0, must-revalidate
+
+/assets/wasm/0.3.1/pkg/franken_markdown_bg.wasm
   Content-Type: application/wasm
   Cache-Control: public, max-age=0, must-revalidate

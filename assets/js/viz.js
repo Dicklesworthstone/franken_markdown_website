@@ -139,10 +139,18 @@ function initKnuth() {
   ctx.font = FONT;
 
   const words = KP_TEXT.split(/\s+/);
-  const wordWidths = words.map((w) => ctx.measureText(w).width);
-  const spaceWidth = ctx.measureText(" ").width;
-  const stretch = spaceWidth / 2;
-  const shrink = spaceWidth / 3;
+  let wordWidths = [];
+  let spaceWidth = 0;
+  let stretch = 0;
+  let shrink = 0;
+  function measure() {
+    ctx.font = FONT;
+    wordWidths = words.map((w) => ctx.measureText(w).width);
+    spaceWidth = ctx.measureText(" ").width;
+    stretch = spaceWidth / 2;
+    shrink = spaceWidth / 3;
+  }
+  measure();
 
   function lineMetrics(i, j, target) {
     // words[i..j) on one line
@@ -266,9 +274,12 @@ function initKnuth() {
   slider.addEventListener("input", update);
   update();
   // Measurements taken before the webfont finished loading used fallback
-  // metrics; re-measure once fonts settle (update() is idempotent).
+  // metrics; re-MEASURE (not just re-render) once fonts settle.
   if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(update).catch(() => {});
+    document.fonts.ready.then(() => {
+      measure();
+      update();
+    }).catch(() => {});
   }
 }
 

@@ -114,7 +114,8 @@ assets/js/playground.js     two-pane editor, HTML/PDF toggle, maximize, share, d
 assets/js/render-worker.js  module Web Worker hosting the wasm renderer
 assets/js/md-highlight.js   editor-overlay markdown highlighter
 assets/js/viz.js            pipeline / Knuth-Plass / subsetting / dependency visualizations
-assets/wasm/                @franken-suite/franken-markdown (wrapper + wasm-bindgen glue + .wasm)
+assets/wasm/<version>/      @franken-suite/franken-markdown (wrapper + wasm-bindgen glue + .wasm);
+                            version-named so the trio updates atomically (see Refreshing below)
 assets/fonts/               self-hosted Inter + JetBrains Mono (latin variable woff2, 87 KB total)
 dev/tailwind.css            CSS source (tokens, materials, keyframes)
 dev/*.mjs                   e2e suite + screenshot/OG-image tooling (playwright-core)
