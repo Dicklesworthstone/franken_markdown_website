@@ -266,7 +266,7 @@ function bootPlayground() {
   })();
 
   try {
-    worker = new Worker(new URL("./render-worker.js?v=6", import.meta.url), { type: "module" });
+    worker = new Worker(new URL("./render-worker.js?v=7", import.meta.url), { type: "module" });
   } catch (error) {
     setStatus("dead", "WORKER FAILED");
     showFatal(`This browser could not start the render worker: ${error.message}`);

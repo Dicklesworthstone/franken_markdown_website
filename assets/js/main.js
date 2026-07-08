@@ -162,11 +162,11 @@ if (terminal) {
     { text: "$ fmd README.md --to both --out README.html", cls: "cmd" },
     { text: "  parse: 1 document -> 1 AST", cls: "out" },
     { text: "  README.html   90,364 B  self-contained", cls: "out" },
-    { text: "  README.pdf    62,009 B  tagged, deterministic", cls: "out" },
+    { text: "  README.pdf    59,305 B  tagged, deterministic", cls: "out" },
     { text: "$ fmd README.md --to pdf --out rerun.pdf   # render again", cls: "cmd" },
     { text: "$ sha256sum README.pdf rerun.pdf", cls: "cmd" },
-    { text: "  0c842eefebae5fe2...  README.pdf", cls: "out" },
-    { text: "  0c842eefebae5fe2...  rerun.pdf", cls: "out" }
+    { text: "  09a7d729c37b92cc...  README.pdf", cls: "out" },
+    { text: "  09a7d729c37b92cc...  rerun.pdf", cls: "out" }
   ];
 
   function lineHtml(line, upTo) {
