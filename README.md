@@ -17,7 +17,7 @@ polished HTML and typeset PDF entirely in your browser.**
 
 **Try it:** [the playground](https://franken-markdown.com/#playground) ·
 [maximized, full-page](https://franken-markdown.com/#view=max) ·
-[a document shared inside a URL](https://franken-markdown.com/#view=max&zdoc=HYwxDsJADAT7vGIluohQIZ4AKIACwQNMvHCnXGzkS4j4PYJ2NDMrHFiK4xE-QnC7HJvmmnLFkrwQ6v080ibkipf0AxVtm61mJaZElGxD26KD8lFkoq5xl8rddo7S0XrXHxJTBLugKYOK--cf70NsoJ0kBvXFsEgdQXtmI9zw8TkwSp-ycYOzTynb8ydhfhWX_5lvxqb5Ag)
+[a document shared inside a URL](https://franken-markdown.com/#view=max&zdoc=HYwxDsJADAT7vGIluohQIZ6AKIACwQNMvHCnXGzkS4j4PYJ2NDMrHFiK4xE-QnC7HJvmmnLFkrwQ6v080ibkipf0AxVtm61mJaZElGxD26KD8lFkoq5xl8rddo7S0XrXHxJTBLugKYOK--cf70NsoJ0kBvXFsEgdQXtmI9zw8TkwSp-ycYOzTynb8ydhfhWX_5lvxqb5Ag)
 
 </div>
 
