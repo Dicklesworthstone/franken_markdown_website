@@ -96,9 +96,17 @@ Modules + WASM require http(s); opening `index.html` via `file://` will not work
 ```bash
 bun run css          # recompile dev/tailwind.css -> assets/css/site.css
 bun run css:watch    # ...continuously
-bun dev/e2e.mjs      # 28-check headless e2e suite (needs `bun run serve` running)
-bun dev/e2e.mjs https://franken-markdown.com/   # same suite against a deployment
 ```
+
+### Testing
+
+| Command | What it proves |
+|---|---|
+| `bun run test` | 28-check headless e2e (Chromium) against localhost — playground renders, toggles, downloads, share round-trips, maximize, all four visualizations, no console errors, no font rejects, desktop chrome intact |
+| `bun run test:live` | The same suite against franken-markdown.com |
+| `bun run verify:live` | sha256-compares every asset the live page references (including the module/worker/wasm import chain) against the local tree — catches stale edge entries and forgotten `?v=` bumps |
+| `bun run test:stress` | Blocks the wasm binary (must surface `WASM FAILED`, never hang) and hammers 12 rounds of interleaved typing + format toggles (must end consistent) |
+| `bun run smoke:firefox` / `bun run smoke:webkit` | Gecko / JavaScriptCore passes against production (needs `bunx playwright install firefox` / `webkit` once); Firefox runs with pdf.js off, exercising the PDF fallback path |
 
 The compiled `assets/css/site.css` is committed, so deployment never needs
 Node/Bun; the deployable site is pure static files.

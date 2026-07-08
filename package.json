@@ -6,7 +6,12 @@
     "css": "tailwindcss -i dev/tailwind.css -o assets/css/site.css --minify",
     "css:watch": "tailwindcss -i dev/tailwind.css -o assets/css/site.css --watch",
     "serve": "python3 -m http.server 8899",
-    "verify:live": "bun dev/verify-live-assets.mjs"
+    "verify:live": "bun dev/verify-live-assets.mjs",
+    "test": "bun dev/e2e.mjs",
+    "test:live": "bun dev/e2e.mjs https://franken-markdown.com/",
+    "test:stress": "bun dev/failure-and-stress.mjs",
+    "smoke:firefox": "bun dev/firefox-smoke.mjs",
+    "smoke:webkit": "bun dev/webkit-smoke.mjs"
   },
   "devDependencies": {
     "@fontsource-variable/inter": "^5.2.8",
