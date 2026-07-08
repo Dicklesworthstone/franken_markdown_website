@@ -33,12 +33,8 @@ while (jsQueue.length > 0) {
     ...[...src.matchAll(/new URL\("(\.[^"]+)", import\.meta\.url\)/g)].map((m) => m[1])
   ];
   for (const spec of specs) {
-    const resolved = new URL(spec, `https://x/${file}`).pathname.slice(1) +
-      (spec.includes("?") ? "" : "");
-    const withQuery = spec.includes("?") ? `${new URL(spec, `https://x/${file}`).pathname.slice(1)}?${new URL(spec, `https://x/${file}`).search.slice(1)}` : resolved;
-    const entry = spec.includes("?")
-      ? new URL(spec, `https://x/${file}`).pathname.slice(1) + new URL(spec, `https://x/${file}`).search
-      : resolved;
+    const u = new URL(spec, `https://x/${file}`);
+    const entry = u.pathname.slice(1) + u.search;
     if (!seen.has(entry)) {
       seen.add(entry);
       refs.add(entry);
