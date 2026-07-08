@@ -96,7 +96,7 @@ Modules + WASM require http(s); opening `index.html` via `file://` will not work
 ```bash
 bun run css          # recompile dev/tailwind.css -> assets/css/site.css
 bun run css:watch    # ...continuously
-bun dev/e2e.mjs      # 27-check headless e2e suite (needs `bun run serve` running)
+bun dev/e2e.mjs      # 28-check headless e2e suite (needs `bun run serve` running)
 bun dev/e2e.mjs https://franken-markdown.com/   # same suite against a deployment
 ```
 

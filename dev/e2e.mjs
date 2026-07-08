@@ -38,6 +38,14 @@ page.on("pageerror", (err) => consoleErrors.push(String(err)));
 await page.goto(BASE, { waitUntil: "networkidle" });
 check("page loads", /frankenmarkdown/i.test(await page.title()));
 
+// Desktop chrome sanity: at 1440px the pill nav must show and the hamburger
+// must not (catches stale-CSS deployments — this failed silently once).
+const chrome = await page.evaluate(() => ({
+  nav: getComputedStyle(document.querySelector("#site-header nav")).display !== "none",
+  burger: getComputedStyle(document.getElementById("mobile-menu-button")).display === "none"
+}));
+check("desktop nav visible, burger hidden", chrome.nav && chrome.burger, JSON.stringify(chrome));
+
 // Wait for the wasm worker to come alive and render the first HTML preview.
 await page.waitForFunction(
   () => document.getElementById("pg-status")?.textContent?.includes("ALIVE"),
