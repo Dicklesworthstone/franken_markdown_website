@@ -379,7 +379,13 @@ function bootPlayground() {
     showDiagnostics(res.diagnostics);
   }
 
+  let lastDiagKey = null;
   function showDiagnostics(diagnostics) {
+    // Skip identical re-renders: the container is aria-live, and re-inserting
+    // the same text would re-announce it to screen readers on every render.
+    const key = JSON.stringify(diagnostics || []);
+    if (key === lastDiagKey) return;
+    lastDiagKey = key;
     els.diag.replaceChildren();
     if (!diagnostics || diagnostics.length === 0) {
       const item = document.createElement("span");

@@ -20,6 +20,7 @@ const check = (name, ok, extra = "") => {
   if (!ok) failures.push(name);
 };
 
+const BASE = (process.argv[2] || "http://localhost:8899/").replace(/\/?$/, "/");
 const browser = await chromium.launch({ executablePath: CHROME });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 
@@ -31,7 +32,7 @@ page.on("console", (msg) => {
 });
 page.on("pageerror", (err) => consoleErrors.push(String(err)));
 
-await page.goto("http://localhost:8899/", { waitUntil: "networkidle" });
+await page.goto(BASE, { waitUntil: "networkidle" });
 check("page loads", /frankenmarkdown/i.test(await page.title()));
 
 // Wait for the wasm worker to come alive and render the first HTML preview.
@@ -134,7 +135,7 @@ check("share builds doc-carrying hash", /^#view=max&(fmt=pdf&)?z?doc=/.test(shar
 
 // Round trip: open the share link in a fresh page.
 const reader = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-await reader.goto("http://localhost:8899/" + shareHash, { waitUntil: "networkidle" });
+await reader.goto(BASE + shareHash, { waitUntil: "networkidle" });
 await reader.waitForFunction(() => document.getElementById("pg-status")?.textContent?.includes("ALIVE"), null, { timeout: 30000 }).catch(() => {});
 const rtMax = await reader.evaluate(() => document.getElementById("pg-root").classList.contains("pg-max"));
 const rtDoc = await reader.evaluate(() => document.getElementById("pg-input").value);
@@ -152,7 +153,7 @@ const unicodeMd = "# Ünïcode → tëst 🧟\n\nvia plain doc= param.";
 const docParam = Buffer.from(unicodeMd, "utf8").toString("base64")
   .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 const deep = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-await deep.goto(`http://localhost:8899/#fmt=pdf&doc=${docParam}`, { waitUntil: "networkidle" });
+await deep.goto(`${BASE}#fmt=pdf&doc=${docParam}`, { waitUntil: "networkidle" });
 await deep.waitForFunction(() => document.getElementById("pg-pdf-frame")?.src.startsWith("blob:"), null, { timeout: 45000 }).catch(() => {});
 const deepState = await deep.evaluate(() => ({
   pdfVisible: !document.getElementById("pg-pane-pdf").classList.contains("hidden"),
@@ -199,7 +200,7 @@ await page.screenshot({ path: "dev/screenshots/00-hero.png" });
 
 // Mobile pass.
 const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
-await mobile.goto("http://localhost:8899/", { waitUntil: "networkidle" });
+await mobile.goto(BASE, { waitUntil: "networkidle" });
 await mobile.waitForFunction(
   () => document.getElementById("pg-status")?.textContent?.includes("ALIVE"),
   null,

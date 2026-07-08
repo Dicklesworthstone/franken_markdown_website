@@ -18,9 +18,6 @@
   <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/site.css?v=3">
-  <!-- modulepreload would not reach the worker's separate module map; preload
-       the actual long pole (the wasm binary, fetched by the bindgen glue). -->
-  <link rel="preload" href="assets/wasm/0.3.1/pkg/franken_markdown_bg.wasm" as="fetch" crossorigin>
 </head>
 <body class="min-h-screen">
   <a href="#playground" class="skip-link">Skip to the playground</a>
@@ -51,7 +48,7 @@
       </div>
     </a>
 
-    <nav class="hidden md:flex items-center gap-1" aria-label="Primary">
+    <nav class="hidden lg:flex items-center gap-1" aria-label="Primary">
       <a href="#playground" class="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors">Playground</a>
       <a href="#pipeline" class="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors">Pipeline</a>
       <a href="#typography" class="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors">Typography</a>
@@ -61,9 +58,9 @@
 
     <div class="flex items-center gap-3">
       <a href="https://github.com/Dicklesworthstone/franken_markdown" target="_blank" rel="noopener"
-        class="hidden md:inline-flex px-5 py-2 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-colors">GitHub</a>
+        class="hidden lg:inline-flex px-5 py-2 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-colors">GitHub</a>
       <button id="mobile-menu-button" aria-expanded="false" aria-controls="mobile-menu"
-        class="md:hidden h-10 w-10 rounded-full border border-emerald-500/20 bg-emerald-500/5 flex flex-col items-center justify-center gap-1">
+        class="lg:hidden h-10 w-10 rounded-full border border-emerald-500/20 bg-emerald-500/5 flex flex-col items-center justify-center gap-1">
         <span class="sr-only">Menu</span>
         <span class="block h-0.5 w-4 bg-emerald-400"></span>
         <span class="block h-0.5 w-4 bg-emerald-400"></span>
@@ -73,7 +70,7 @@
   </header>
 
   <!-- Mobile drawer -->
-  <div id="mobile-menu" class="fixed inset-y-0 right-0 z-[60] w-72 translate-x-full transition-transform duration-500 bg-[#020a06] border-l border-emerald-500/20 p-8 flex flex-col gap-2 md:hidden">
+  <div id="mobile-menu" class="fixed inset-y-0 right-0 z-[60] w-72 translate-x-full transition-transform duration-500 bg-[#020a06] border-l border-emerald-500/20 p-8 flex flex-col gap-2 lg:hidden">
     <div class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-4">LAB_MENU</div>
     <a href="#playground" class="py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Playground</a>
     <a href="#pipeline" class="py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Pipeline</a>
@@ -342,7 +339,7 @@
           <!-- Diagnostics strip -->
           <div class="flex flex-wrap items-center gap-x-6 gap-y-2 px-5 md:px-6 py-3 border-t border-white/5 bg-black/40 font-mono text-[11px]">
             <span class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-600">Diagnostics</span>
-            <span id="pg-diag" class="flex flex-wrap gap-x-4 gap-y-1"></span>
+            <span id="pg-diag" class="flex flex-wrap gap-x-4 gap-y-1" role="status" aria-live="polite"></span>
             <span class="flex-1"></span>
             <span id="pg-stats" class="text-slate-500"></span>
           </div>
