@@ -166,6 +166,18 @@ Pages' deploy purge on custom domains; during development, a fresh browser
 received the previous deploy's JavaScript from the edge cache. If you want
 long TTLs, fingerprint the filenames first.
 
+Two more sharp edges, both observed in production:
+
+- The zone's Browser Cache TTL setting rewrites `max-age=0` upward (to 14400
+  here), so browsers may hold an asset for hours without revalidating.
+- Requests made moments after a deploy can be answered during the deploy's
+  propagation window and cached under the *previous* deploy's header config
+  (that is how one stylesheet URL got pinned for a day with stale content).
+
+Consequence: **whenever an asset's content changes, bump its `?v=` query in
+`index.html`** (and in module import specifiers if the file is imported).
+The e2e suite's desktop-chrome check exists to catch a stale stylesheet.
+
 ---
 
 ## Refreshing the WASM Artifacts
