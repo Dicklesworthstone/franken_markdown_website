@@ -2,7 +2,7 @@
    Left: syntax-highlighted Markdown editor (textarea + overlay).
    Right: HTML or PDF rendered by the franken_markdown wasm core in a worker. */
 
-import { highlightMarkdown } from "./md-highlight.js?v=4";
+import { highlightMarkdown } from "./md-highlight.js?v=6";
 
 const SAMPLES = {
   showcase: `# FrankenMarkdown
@@ -266,7 +266,7 @@ function bootPlayground() {
   })();
 
   try {
-    worker = new Worker(new URL("./render-worker.js?v=4", import.meta.url), { type: "module" });
+    worker = new Worker(new URL("./render-worker.js?v=6", import.meta.url), { type: "module" });
   } catch (error) {
     setStatus("dead", "WORKER FAILED");
     showFatal(`This browser could not start the render worker: ${error.message}`);
