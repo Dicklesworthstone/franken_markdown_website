@@ -153,7 +153,12 @@ code, pre, kbd {
   border-radius: 0 0 1rem 1rem;
   transition: top 0.3s var(--ease-stripe);
 }
-.skip-link:focus { top: 0; outline: none; }
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 0;
+  outline: 2px solid var(--color-green-prime);
+  outline-offset: 4px;
+}
 
 /* ------------------------------------------------------------------ */
 /* Materials                                                           */

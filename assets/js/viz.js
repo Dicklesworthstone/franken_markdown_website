@@ -307,7 +307,7 @@ function initSubset() {
   const cells = new Map();
   for (const g of glyphs) {
     const cell = document.createElement("span");
-    cell.className = "flex items-center justify-center rounded border border-white/5 bg-white/[0.02] font-mono text-[11px] text-slate-600 transition-all duration-300";
+    cell.className = "flex items-center justify-center rounded border border-white/5 bg-white/[0.02] font-mono text-[11px] text-slate-600 transition-colors duration-300";
     cell.textContent = g;
     grid.appendChild(cell);
     cells.set(g, cell);

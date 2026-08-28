@@ -17,7 +17,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23020a06'/%3E%3Crect width='64' height='64' rx='14' fill='none' stroke='%2310b981' stroke-opacity='0.5' stroke-width='2'/%3E%3Ctext x='32' y='44' font-family='monospace' font-size='36' font-weight='900' fill='%2334d399' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E">
   <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="assets/css/site.css?v=5">
+  <link rel="stylesheet" href="assets/css/site.css?v=6">
 </head>
 <body class="min-h-screen">
   <a href="#playground" class="skip-link">Skip to the playground</a>
@@ -29,7 +29,7 @@
 
   <!-- ============================== HEADER ============================== -->
   <header id="site-header"
-    class="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-[94%] lg:w-[1200px] h-14 md:h-16 px-4 md:px-8 rounded-full border border-transparent transition-all duration-500 flex items-center justify-between">
+    class="fixed top-[max(1rem,env(safe-area-inset-top))] md:top-6 left-1/2 -translate-x-1/2 z-50 w-[94%] lg:w-[1200px] h-14 md:h-16 px-4 md:px-8 rounded-full border border-transparent transition-[background-color,border-color,box-shadow,transform] duration-500 flex items-center justify-between">
     <a href="#top" class="flex items-center gap-3 group">
       <div class="relative h-9 w-9 rounded-lg bg-gradient-to-tr from-[#004225] to-emerald-400 flex items-center justify-center font-mono font-black text-black text-lg shadow-[0_0_20px_rgba(16,185,129,0.25)]">
         F
@@ -44,7 +44,7 @@
       </div>
       <div class="leading-none">
         <div class="font-black tracking-tight text-sm md:text-base">FrankenMarkdown</div>
-        <div class="text-[7px] font-black text-emerald-500 uppercase tracking-widest animate-pulse mt-1">RENDERER_ALIVE</div>
+        <div class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mt-1">WASM 0.3.5</div>
       </div>
     </a>
 
@@ -60,7 +60,7 @@
       <a href="https://github.com/Dicklesworthstone/franken_markdown" target="_blank" rel="noopener"
         class="hidden lg:inline-flex px-5 py-2 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-colors">GitHub</a>
       <button id="mobile-menu-button" aria-expanded="false" aria-controls="mobile-menu"
-        class="lg:hidden h-10 w-10 rounded-full border border-emerald-500/20 bg-emerald-500/5 flex flex-col items-center justify-center gap-1">
+        class="lg:hidden min-h-11 min-w-11 h-11 w-11 rounded-full border border-emerald-500/20 bg-emerald-500/5 flex flex-col items-center justify-center gap-1">
         <span class="sr-only">Menu</span>
         <span class="block h-0.5 w-4 bg-emerald-400"></span>
         <span class="block h-0.5 w-4 bg-emerald-400"></span>
@@ -70,14 +70,15 @@
   </header>
 
   <!-- Mobile drawer -->
-  <div id="mobile-menu" class="fixed inset-y-0 right-0 z-[60] w-72 translate-x-full transition-transform duration-500 bg-[#020a06] border-l border-emerald-500/20 p-8 flex flex-col gap-2 lg:hidden">
-    <div class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-4">LAB_MENU</div>
-    <a href="#playground" class="py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Playground</a>
-    <a href="#pipeline" class="py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Pipeline</a>
-    <a href="#typography" class="py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Typography</a>
-    <a href="#features" class="py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Features</a>
-    <a href="#install" class="py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Install</a>
-    <a href="https://github.com/Dicklesworthstone/franken_markdown" target="_blank" rel="noopener" class="mt-6 px-5 py-3 rounded-2xl bg-white text-black text-center text-[10px] font-black uppercase tracking-widest">GitHub</a>
+  <div id="mobile-menu-backdrop" hidden class="fixed inset-0 z-40 bg-black/60 lg:hidden"></div>
+  <div id="mobile-menu" class="fixed inset-y-0 right-0 z-[60] w-[min(18rem,100%)] translate-x-full transition-transform duration-500 bg-[#020a06] border-l border-emerald-500/20 p-8 pt-[max(2rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))] flex flex-col gap-1 lg:hidden" role="dialog" aria-modal="true" aria-labelledby="mobile-menu-label" tabindex="-1">
+    <div id="mobile-menu-label" class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-4">LAB_MENU</div>
+    <a href="#playground" class="min-h-11 flex items-center py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Playground</a>
+    <a href="#pipeline" class="min-h-11 flex items-center py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Pipeline</a>
+    <a href="#typography" class="min-h-11 flex items-center py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Typography</a>
+    <a href="#features" class="min-h-11 flex items-center py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Features</a>
+    <a href="#install" class="min-h-11 flex items-center py-3 text-sm font-black uppercase tracking-[0.15em] text-slate-300 border-b border-white/5">Install</a>
+    <a href="https://github.com/Dicklesworthstone/franken_markdown" target="_blank" rel="noopener" class="mt-6 min-h-11 px-5 py-3 rounded-2xl bg-white text-black text-center text-[10px] font-black uppercase tracking-widest flex items-center justify-center">GitHub</a>
   </div>
 
   <main id="top">
@@ -190,7 +191,7 @@
           <div class="bg-[#020a06]/80 px-6 py-10 text-center">
             <div class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-3">WASM Payload</div>
             <div class="text-4xl sm:text-5xl font-black tabular-nums text-white">1.8<span class="text-lg text-slate-500 ml-1">MB gz</span></div>
-            <div class="text-xs text-slate-500 mt-2">fonts, highlighter &amp; PDF writer included</div>
+            <div class="text-xs text-slate-500 mt-2">fonts, fmd-math, hyphen patterns, PDF writer</div>
           </div>
         </div>
       </div>
@@ -208,7 +209,8 @@
         <p class="text-slate-400 max-w-2xl mx-auto text-base md:text-lg">
           Type Markdown on the left. The <em>actual</em> engine — compiled to WebAssembly,
           running in a worker in your browser — renders it on the right. Flip the switch
-          to typeset the same document as a PDF. No server. No mock. The monster itself.
+          to typeset the same document as a PDF. The GFM sample is footnotes, GitHub
+          alerts, and <code class="text-emerald-300">[[TOC]]</code> — all in this 0.3.5 build.
         </p>
       </div>
 
@@ -261,19 +263,20 @@
 
           <!-- Toolbar -->
           <div class="flex flex-wrap items-center gap-3 px-5 md:px-6 py-3 border-b border-white/5 bg-black/30">
-            <div class="flex items-center gap-2" role="group" aria-label="Sample documents">
-              <span class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-600 mr-1">Sample</span>
-              <button data-sample="showcase" aria-pressed="true" class="px-3 py-1.5 rounded-full border border-emerald-500/60 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-emerald-300 hover:border-emerald-500/50 transition-colors">Showcase</button>
-              <button data-sample="code" aria-pressed="false" class="px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:border-emerald-500/50 transition-colors">Code</button>
-              <button data-sample="tables" aria-pressed="false" class="px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:border-emerald-500/50 transition-colors">Tables</button>
+            <div class="flex items-center gap-2 min-w-0 overflow-x-auto overscroll-x-contain pb-1 -mb-1" role="group" aria-label="Sample documents">
+              <span class="shrink-0 text-[10px] font-black uppercase tracking-[0.25em] text-slate-600 mr-1">Sample</span>
+              <button data-sample="showcase" aria-pressed="true" class="shrink-0 min-h-11 px-3 py-2 rounded-full border border-emerald-500/60 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-emerald-300 hover:border-emerald-500/50 transition-colors">Showcase</button>
+              <button data-sample="code" aria-pressed="false" class="shrink-0 min-h-11 px-3 py-2 rounded-full border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:border-emerald-500/50 transition-colors">Code</button>
+              <button data-sample="tables" aria-pressed="false" class="shrink-0 min-h-11 px-3 py-2 rounded-full border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:border-emerald-500/50 transition-colors">Tables</button>
+              <button data-sample="gfm" aria-pressed="false" class="shrink-0 min-h-11 px-3 py-2 rounded-full border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:border-emerald-500/50 transition-colors">GFM</button>
             </div>
 
             <div class="flex-1"></div>
 
             <!-- The toggle -->
             <div class="inline-flex items-center rounded-full border border-emerald-500/25 bg-black/50 p-1" role="group" aria-label="Output format">
-              <button id="pg-toggle-html" aria-pressed="true" class="px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300">HTML</button>
-              <button id="pg-toggle-pdf" aria-pressed="false" class="px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300">PDF</button>
+              <button id="pg-toggle-html" aria-pressed="true" class="min-h-11 px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-[0.2em] transition-colors duration-300">HTML</button>
+              <button id="pg-toggle-pdf" aria-pressed="false" class="min-h-11 px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-[0.2em] transition-colors duration-300">PDF</button>
             </div>
 
             <div class="flex-1"></div>
@@ -526,7 +529,19 @@
             <svg class="h-6 w-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01M6 18h.01"/></svg>
           </div>
           <h3 class="text-lg font-black mb-2">Agent-First CLI</h3>
-          <p class="text-sm text-slate-400 leading-relaxed">The first command an agent guesses works: <code class="text-emerald-300">fmd README.md</code>. Stdout is data, stderr is diagnostics, exit codes are stable, and <code class="text-emerald-300">capabilities --json</code>, <code class="text-emerald-300">doctor --json</code>, and <code class="text-emerald-300">robot-docs</code> expose the whole contract.</p>
+          <p class="text-sm text-slate-400 leading-relaxed">The first command an agent guesses works: <code class="text-emerald-300">fmd README.md</code>. Stdout is data, stderr is diagnostics, exit codes are stable, and <code class="text-emerald-300">capabilities --json</code>, <code class="text-emerald-300">doctor --json</code>, <code class="text-emerald-300">doctor fonts</code>, and <code class="text-emerald-300">robot-docs</code> expose the whole contract.</p>
+        </div>
+      </div>
+
+      <div class="mt-8 glass-modern rounded-3xl p-6 md:p-8 reveal">
+        <div class="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-4">In this 0.3.5 WASM · probed, not promised</div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-slate-400">
+          <div><span class="text-emerald-300 font-bold">GFM footnotes</span> — <code class="text-emerald-200/80">[^id]</code> refs + a notes section in HTML and PDF.</div>
+          <div><span class="text-emerald-300 font-bold">GitHub alerts</span> — <code class="text-emerald-200/80">[!NOTE]</code> / TIP / IMPORTANT / WARNING / CAUTION callouts.</div>
+          <div><span class="text-emerald-300 font-bold">Table of contents</span> — <code class="text-emerald-200/80">[[TOC]]</code>, <code class="text-emerald-200/80">[TOC]</code>, <code class="text-emerald-200/80">[[_TOC_]]</code>.</div>
+          <div><span class="text-emerald-300 font-bold">CJK line breaking</span> — UAX #14 opportunities in PDF layout. Bundled faces still have no CJK glyphs (tofu until fallback faces land).</div>
+          <div><span class="text-emerald-300 font-bold">Tagged PDF</span> — hierarchical structure tree. CLI <code class="text-emerald-200/80">--pdf-a 2b</code> is archival PDF/A (not a playground toggle).</div>
+          <div><span class="text-emerald-300 font-bold">Not in this build</span> — HTML MathML, definition lists, WOFF2 HTML subsets. Those stay off the sample chips until they render.</div>
         </div>
       </div>
     </section>
@@ -626,7 +641,7 @@
             </div>
             <div>
               <div class="flex justify-between font-mono text-[10px] text-emerald-400/80 mb-1"><span>embedded subset</span><span id="subset-bytes"></span></div>
-              <div class="h-3 rounded-full bg-white/5 overflow-hidden"><div id="subset-bar-sub" class="h-full rounded-full bg-gradient-to-r from-[#004225] to-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.4)] transition-all duration-500" style="width: 2%"></div></div>
+              <div class="h-3 rounded-full bg-white/5 overflow-hidden"><div id="subset-bar-sub" class="h-full rounded-full bg-gradient-to-r from-[#004225] to-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.4)] transition-[width] duration-500" style="width: 2%"></div></div>
             </div>
           </div>
         </div>
@@ -702,7 +717,7 @@
               </tr>
               <tr>
                 <td class="px-6 py-4 font-bold text-slate-300">PDF typography</td>
-                <td class="px-6 py-4 text-emerald-300">Knuth–Plass, kerning, ligatures, tagged</td>
+                <td class="px-6 py-4 text-emerald-300">Knuth–Plass, hyphenation, CJK breaks, tagged</td>
                 <td class="px-6 py-4">browser print pipeline</td>
                 <td class="px-6 py-4">excellent (TeX)</td>
                 <td class="px-6 py-4">whatever the crate does</td>
@@ -771,6 +786,9 @@
           <pre class="px-6 py-5 font-mono text-sm overflow-x-auto leading-relaxed"><span class="text-emerald-500 font-bold">$</span> <span class="text-white">fmd README.md --out README.html</span>          <span class="text-slate-600"># self-contained HTML</span>
 <span class="text-emerald-500 font-bold">$</span> <span class="text-white">fmd README.md --to pdf --out README.pdf</span>   <span class="text-slate-600"># compact tagged PDF</span>
 <span class="text-emerald-500 font-bold">$</span> <span class="text-white">fmd README.md --to both --out README.html</span> <span class="text-slate-600"># one parse, both bodies</span>
+<span class="text-emerald-500 font-bold">$</span> <span class="text-white">fmd README.md --to pdf --pdf-a 2b --out README.pdf</span>
+<span class="text-slate-600"># PDF/A-2b archival profile (CLI; not a playground toggle)</span>
+<span class="text-emerald-500 font-bold">$</span> <span class="text-white">fmd doctor fonts --corpus . --json</span>      <span class="text-slate-600"># glyph coverage vs bundled faces</span>
 <span class="text-emerald-500 font-bold">$</span> <span class="text-white">fmd capabilities --json</span>                   <span class="text-slate-600"># the machine-readable contract</span></pre>
         </div>
 
@@ -804,9 +822,10 @@ const pdf  = await fmd.renderPdf("# Report", { metadataEpochSeconds: 1700000000 
         <div class="text-[10px] font-black uppercase tracking-[0.3em] text-amber-400/80 mb-4">LAB_NOTES · Honest scar tissue</div>
         <ul class="grid md:grid-cols-2 gap-x-8 gap-y-2 text-sm text-slate-400 list-disc list-inside">
           <li>CommonMark coverage is partial and measured: 379/652 examples (64.1% of in-scope; raw-HTML passthrough is an intentional non-goal) — a CI-ratcheted floor.</li>
-          <li>The npm package <a href="https://www.npmjs.com/package/@franken-suite/franken-markdown" target="_blank" rel="noopener" class="text-amber-300/80 underline decoration-amber-300/30 hover:text-amber-200"><code>@franken-suite/franken-markdown</code></a> ships the exact parity-gated build this page runs; browser visual/golden fixtures are still early.</li>
+          <li>This page runs engine <strong class="text-slate-300">0.3.5</strong> WASM. crates.io latest is 0.4.0; npm <code>@franken-suite/franken-markdown</code> is 0.3.2. They are not the same byte stream.</li>
           <li>PDF pagination is still maturing: keep-with-next and repeatable table headers work; full widow/orphan control is roadmap.</li>
           <li>SVG support is practical, not browser-complete — unsupported constructs surface as structured render warnings, never silent lies.</li>
+          <li>HTML MathML and definition lists are not in this WASM. The GFM sample chip only includes footnotes, alerts, and TOC.</li>
         </ul>
       </div>
     </section>
@@ -831,8 +850,8 @@ const pdf  = await fmd.renderPdf("# Report", { metadataEpochSeconds: 1700000000 
               </p>
               <div class="flex flex-col gap-2">
                 <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
-                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></span>
-                  All Systems Operational
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></span>
+                  Playground serves WASM 0.3.5
                 </div>
                 <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
                   <span class="h-1.5 w-1.5 rounded-full bg-emerald-500/50"></span>
@@ -869,7 +888,7 @@ const pdf  = await fmd.renderPdf("# Report", { metadataEpochSeconds: 1700000000 
     </footer>
   </main>
 
-  <script type="module" src="assets/js/main.js?v=8"></script>
-  <script type="module" src="assets/js/playground.js?v=8"></script>
+  <script type="module" src="assets/js/main.js?v=9"></script>
+  <script type="module" src="assets/js/playground.js?v=9"></script>
 </body>
 </html>

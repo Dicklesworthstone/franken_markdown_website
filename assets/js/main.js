@@ -1,7 +1,7 @@
 /* Site chrome: header state, scroll reveals, glitch text, the monster eye,
    hero terminal typing, count-up stats, copy buttons. */
 
-import { animateCount } from "./viz.js?v=7";
+import { animateCount } from "./viz.js?v=8";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -30,11 +30,24 @@ if (header) {
 /* --- Mobile menu --- */
 const menuButton = document.getElementById("mobile-menu-button");
 const mobileMenu = document.getElementById("mobile-menu");
+const mobileBackdrop = document.getElementById("mobile-menu-backdrop");
 if (menuButton && mobileMenu) {
+  let lastFocus = null;
+  const focusables = () =>
+    [...mobileMenu.querySelectorAll("a, button")].filter(
+      (el) => !el.hasAttribute("disabled")
+    );
   const setOpen = (open) => {
     mobileMenu.classList.toggle("translate-x-full", !open);
+    if (mobileBackdrop) mobileBackdrop.hidden = !open;
     menuButton.setAttribute("aria-expanded", String(open));
     document.body.style.overflow = open ? "hidden" : "";
+    if (open) {
+      lastFocus = document.activeElement;
+      (focusables()[0] || mobileMenu).focus();
+    } else if (lastFocus && typeof lastFocus.focus === "function") {
+      lastFocus.focus();
+    }
   };
   menuButton.addEventListener("click", () => {
     setOpen(mobileMenu.classList.contains("translate-x-full"));
@@ -42,8 +55,26 @@ if (menuButton && mobileMenu) {
   mobileMenu.addEventListener("click", (event) => {
     if (event.target.closest("a") || event.target === mobileMenu) setOpen(false);
   });
+  mobileBackdrop?.addEventListener("click", () => setOpen(false));
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") setOpen(false);
+    const open = !mobileMenu.classList.contains("translate-x-full");
+    if (!open) return;
+    if (event.key === "Escape") {
+      setOpen(false);
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const items = focusables();
+    if (items.length === 0) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   });
 }
 

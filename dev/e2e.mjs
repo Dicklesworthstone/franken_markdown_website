@@ -131,6 +131,21 @@ const sampleOk = await page.evaluate(() =>
   document.getElementById("pg-html-frame").srcdoc.includes("clean-room highlighter"));
 check("sample chip swaps document", sampleOk);
 
+await page.locator("[data-sample='gfm']").click();
+await page.waitForFunction(
+  () => {
+    const src = document.getElementById("pg-html-frame")?.srcdoc || "";
+    return src.includes("class=\"footnotes\"") || src.includes("class=\"toc\"");
+  },
+  null,
+  { timeout: 15000 }
+).catch(() => {});
+const gfmOk = await page.evaluate(() => {
+  const src = document.getElementById("pg-html-frame").srcdoc;
+  return src.includes("class=\"footnotes\"") && src.includes("class=\"toc\"");
+});
+check("gfm sample renders footnotes and toc", gfmOk);
+
 // Download filenames derive from the document's first heading.
 await page.locator("[data-sample='showcase']").click();
 await page.waitForTimeout(300);
@@ -243,6 +258,15 @@ await mobile.waitForTimeout(800);
 await mobile.screenshot({ path: "dev/screenshots/07-mobile-playground.png" });
 const menuVisible = await mobile.locator("#mobile-menu-button").isVisible();
 check("mobile menu button visible", menuVisible);
+const overflow = await mobile.evaluate(() => {
+  const root = document.documentElement;
+  return { sw: root.scrollWidth, cw: root.clientWidth };
+});
+check(
+  "mobile layout viewport is not inflated",
+  overflow.sw <= overflow.cw + 1,
+  JSON.stringify(overflow)
+);
 
 check("no console errors", consoleErrors.length === 0, consoleErrors.slice(0, 3).join(" | "));
 check("preview fonts accepted (no OTS rejects)", fontWarnings.length === 0, fontWarnings.slice(0, 2).join(" | "));

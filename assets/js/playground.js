@@ -119,6 +119,38 @@ wrapping-badness solver spends the page width where it reduces wrapping.
 | 7 | ok | gamma |
 
 > Try the PDF toggle — the same measurement drives both surfaces.
+`,
+
+  gfm: `# GFM extras this engine already ships
+
+[[TOC]]
+
+> [!NOTE]
+> Footnotes, GitHub-style alerts, and a \`[[TOC]]\` marker are first-class in
+> the HTML path of this WASM build. The PDF pane typesets the same AST.
+
+> [!WARNING]
+> Definition lists and HTML MathML are still landing. This sample only shows
+> what renders today — no vapor features.
+
+## Why a table of contents
+
+The TOC is built from headings below the marker, nested by level.
+
+## Footnotes
+
+A claim can carry a note.[^first] A second reference to the same note
+reuses the number.[^first]
+
+[^first]: Numbered by first-reference order, then listed at the end of the
+document. Nested definitions are collected too.
+
+## Task list
+
+- [x] GFM footnotes
+- [x] GitHub alerts (\`NOTE\` / \`TIP\` / \`IMPORTANT\` / \`WARNING\` / \`CAUTION\`)
+- [x] \`[[TOC]]\` / \`[TOC]\` / \`[[_TOC_]]\`
+- [ ] HTML MathML (not in this build)
 `
 };
 
