@@ -14,7 +14,7 @@
    and .wasm always update as one unit: edge caches can never pair an old
    glue file with a new binary. Bump this path (and the worker URL ?v= in
    playground.js) when refreshing the engine. */
-import { init, capabilities, renderHtml, renderPdf } from "../wasm/0.4.1/franken_markdown.js";
+import { init, capabilities, renderHtml, renderPdf } from "../wasm/0.4.2/franken_markdown.js";
 
 const booted = (async () => {
   await init();
