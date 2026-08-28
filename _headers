@@ -27,3 +27,7 @@
 /assets/wasm/0.3.5/pkg/franken_markdown_bg.wasm
   Content-Type: application/wasm
   Cache-Control: public, max-age=0, must-revalidate
+
+/assets/wasm/0.4.1/pkg/franken_markdown_bg.wasm
+  Content-Type: application/wasm
+  Cache-Control: public, max-age=0, must-revalidate
