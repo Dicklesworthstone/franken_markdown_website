@@ -5,12 +5,32 @@
    bun dev/e2e.mjs https://franken-markdown.com/ */
 
 import { chromium } from "playwright-core";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 
-const CHROME = [
-  `${process.env.HOME}/.cache/ms-playwright/chromium-1217/chrome-linux64/chrome`,
-  `${process.env.HOME}/.cache/ms-playwright/chromium-1200/chrome-linux64/chrome`
-].find((p) => existsSync(p));
+function findChrome() {
+  const pinned = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  if (pinned && existsSync(pinned)) return pinned;
+  const home = process.env.HOME || "";
+  const roots = [
+    `${home}/.cache/ms-playwright`,
+    `${home}/Library/Caches/ms-playwright`
+  ];
+  const candidates = [];
+  for (const root of roots) {
+    if (!existsSync(root)) continue;
+    for (const dir of readdirSync(root)) {
+      if (!dir.startsWith("chromium-") || dir.includes("headless")) continue;
+      candidates.push(
+        `${root}/${dir}/chrome-linux64/chrome`,
+        `${root}/${dir}/chrome-mac/Chromium.app/Contents/MacOS/Chromium`,
+        `${root}/${dir}/chrome-mac-arm64/Chromium.app/Contents/MacOS/Chromium`
+      );
+    }
+  }
+  return candidates.find((p) => existsSync(p));
+}
+
+const CHROME = findChrome();
 
 if (!CHROME) {
   console.error("no cached chromium found");

@@ -167,6 +167,13 @@ wrangler pages deploy dist --project-name franken-markdown --branch main
 **GitHub Pages:** Settings → Pages → deploy from branch, folder `/ (root)`.
 `.nojekyll` is already present; GitHub serves `.wasm` with the correct MIME type.
 
+The site is **not** Git-connected to Pages (`Git Provider: No`). Production
+updates are `wrangler pages deploy`, not a GitHub push. Last production
+engine bump: **0.3.5** (2026-08-28), `assets/wasm/0.3.5/`, worker cache-bust
+`playground.js?v=8`. Artifact sha256
+`1da66d986365f627dce8a05483feb9c2d2d9d45a29e4474fbd057e01abe83662`
+(raw 4,028,677; gzip 1,803,496; live `Content-Encoding: br`).
+
 **A hard-won caching note:** `_headers` deliberately serves assets with
 `max-age=0, must-revalidate` (cheap ETag 304s) instead of long TTLs. These
 URLs are not content-fingerprinted, and long edge TTLs outlive Cloudflare
@@ -213,13 +220,28 @@ cp target/fmd-checks/wasm-package/pkg/franken_markdown.js      ../franken_markdo
 cp target/fmd-checks/wasm-package/pkg/franken_markdown_bg.wasm ../franken_markdown_website/assets/wasm/$V/pkg/
 ```
 
+Or, after the gate:
+
+```bash
+dev/refresh-engine-wasm.sh           # copies into assets/wasm/<version>/ + bumps ?v=
+dev/refresh-engine-wasm.sh --deploy  # then wrangler pages deploy
+```
+
 Then point the import in `assets/js/render-worker.js` at the new directory and
-bump the worker URL `?v=` in `assets/js/playground.js`. The bundle lives in a
-version-named directory so the wrapper, glue, and binary always update as one
-unit; an edge cache can never pair an old glue file with a new binary.
+bump the worker URL `?v=` in `assets/js/playground.js` (the helper does both).
+The bundle lives in a version-named directory so the wrapper, glue, and binary
+always update as one unit; an edge cache can never pair an old glue file with a
+new binary.
+
+**Do not `wasm-opt` this module for transfer size.** On the 0.3.5
+`bg.wasm`, `-Oz` / `-O4` / `-Os` shrank raw by ~117 KB but **grew** gzip and
+brotli (~8–10 KB). Pages already brotli-encodes; the transfer-optimal ship is
+the wasm-bindgen output as-is.
 
 Never copy an unverified build; the whole point of the playground is that it
-runs the parity-gated engine.
+runs the parity-gated engine. The helper also writes a local staging copy
+under `dev/engine-wasm/<version>/` (gitignored) so a later agent can finish
+the `assets/wasm/` copy if that tree is locked.
 
 ---
 
@@ -228,7 +250,7 @@ runs the parity-gated engine.
 | Symptom | Fix |
 |---|---|
 | Blank page from `file://` | ES modules + wasm need http(s): `bun run serve` |
-| Playground stuck on `REANIMATING…` | The 1.5 MB (gzipped) wasm module is still downloading, or the browser blocks module workers; check the diagnostics strip |
+| Playground stuck on `REANIMATING…` | The ~1.8 MB (gzipped) wasm module is still downloading, or the browser blocks module workers; check the diagnostics strip |
 | PDF pane shows an "open PDF" button instead of a preview | That browser (most mobile ones) can't inline PDFs; the button opens/downloads the same bytes |
 | Share says "Link in address bar" instead of "Link copied" | Clipboard permission was denied; the URL in the address bar is the share link |
 | Edits to `index.html` classes don't take effect | Rebuild the compiled stylesheet: `bun run css` |
@@ -263,10 +285,12 @@ Yes. It is the identical Rust core compiled to `wasm32-unknown-unknown`,
 shipped through a CI gate that fails unless wasm and native output are
 byte-identical over a corpus.
 
-**Why is the wasm module ~3 MB (1.5 MB gzipped)?**
+**Why is the wasm module ~4 MB (1.8 MB gzipped, ~1.35 MB brotli)?**
 It embeds everything: bundled fonts, the syntax highlighter, the layout
-engine, the SVG-to-PDF drawing path, and a hand-rolled DEFLATE. There are no
-runtime downloads after it loads.
+engine (including fmd-math), the SVG-to-PDF drawing path, and a hand-rolled
+DEFLATE. There are no runtime downloads after it loads. Gzip is the
+apples-to-apples figure vs older 0.3.2 (~3.3 MB raw / 1.5 MB gz); the live
+host serves brotli.
 
 **Can I use the renderer in my own page?**
 `npm install @franken-suite/franken-markdown`, then

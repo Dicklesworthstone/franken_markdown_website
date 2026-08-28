@@ -56,7 +56,7 @@ const PIPELINE_STAGES = {
   wasm: {
     title: "WASM ABI",
     body: "The same core compiled to wasm32 with a thin wasm-bindgen adapter. Fonts and images arrive as bytes from the host. CI proves the browser build renders byte-identical HTML and PDF to the native binary.",
-    facts: ["1.5 MB gzipped, fonts included", "native ↔ wasm parity gate", "no threads, fs, or network"]
+    facts: ["1.8 MB gzipped, fonts included", "native ↔ wasm parity gate", "no threads, fs, or network"]
   }
 };
 
