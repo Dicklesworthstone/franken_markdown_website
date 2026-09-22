@@ -30,7 +30,7 @@ while (jsQueue.length > 0) {
   const src = readFileSync(file, "utf8");
   const specs = [
     ...[...src.matchAll(/from "(\.[^"]+)"/g)].map((m) => m[1]),
-    ...[...src.matchAll(/new URL\("(\.[^"]+)", import\.meta\.url\)/g)].map((m) => m[1])
+    ...[...src.matchAll(/new URL\("(\.[^"]+)", import\.meta\.url\)/g)].map((m) => m[1]),
   ];
   for (const spec of specs) {
     const u = new URL(spec, `https://x/${file}`);
@@ -59,7 +59,9 @@ for (const ref of [...refs].sort()) {
   const remote = sha(Buffer.from(await res.arrayBuffer()));
   const ok = res.ok && local === remote;
   if (!ok) stale++;
-  console.log(`${ok ? "OK   " : "STALE"} ${ref}  local=${local} remote=${remote} http=${res.status} cf=${res.headers.get("cf-cache-status") || "-"}`);
+  console.log(
+    `${ok ? "OK   " : "STALE"} ${ref}  local=${local} remote=${remote} http=${res.status} cf=${res.headers.get("cf-cache-status") || "-"}`,
+  );
 }
 console.log(stale === 0 ? "ALL LIVE ASSETS MATCH LOCAL" : `${stale} STALE ASSET(S)`);
 process.exit(stale === 0 ? 0 : 1);
