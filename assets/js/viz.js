@@ -11,15 +11,18 @@ function whenVisible(el, init, margin = "240px") {
     init();
     return;
   }
-  const io = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (entry.isIntersecting) {
-        io.disconnect();
-        init();
-        return;
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          io.disconnect();
+          init();
+          return;
+        }
       }
-    }
-  }, { rootMargin: margin });
+    },
+    { rootMargin: margin },
+  );
   io.observe(el);
 }
 
@@ -31,33 +34,45 @@ const PIPELINE_STAGES = {
   source: {
     title: "Markdown source",
     body: "A file, stdin, or a raw string. The engine never reads the filesystem or the network itself — bytes in, bytes out. That is what makes the same core run natively and in this very page.",
-    facts: ["input: UTF-8 markdown", "hosts: CLI · library · WASM", "limit guards before parse"]
+    facts: ["input: UTF-8 markdown", "hosts: CLI · library · WASM", "limit guards before parse"],
   },
   parser: {
     title: "Scanner + clean-room parser",
     body: "A hand-written block and inline parser (CommonMark/GFM subset) with byte-level candidate guards: ordinary prose stays on contiguous byte walks and skips the expensive probes entirely. Conformance is a ratcheted CI floor — it can rise, never drop.",
-    facts: ["zero parser crates", "379/652 CommonMark ratchet", "recoverable diagnostics with byte spans"]
+    facts: [
+      "zero parser crates",
+      "379/652 CommonMark ratchet",
+      "recoverable diagnostics with byte spans",
+    ],
   },
   ast: {
     title: "One document AST",
     body: "Parse once, render many. Every output surface reads the same renderer-neutral tree, so HTML and PDF can never drift apart structurally. The typed theme model rides alongside: colors, spacing, code theme, page contract.",
-    facts: ["single parse per document", "shared typed theme", "spanned variant for tooling"]
+    facts: ["single parse per document", "shared typed theme", "spanned variant for tooling"],
   },
   html: {
     title: "HTML emitter",
     body: "A self-contained preview document: inlined CSS, deterministic embedded TTF font subsets, dark-mode support, responsive tables, and the shared clean-room syntax highlighter. No JavaScript required in the output.",
-    facts: ["one .html file, no CDN", "dark mode via media query", "safe escaping by default"]
+    facts: ["one .html file, no CDN", "dark mode via media query", "safe escaping by default"],
   },
   pdf: {
     title: "Layout + PDF writer",
     body: "Real font metrics, GPOS kerning, GSUB ligatures, Knuth–Plass line breaking, Liang hyphenation, measured-column tables, tagged structure, and a hand-rolled DEFLATE compressor. Compact, deterministic bytes — CI diffs renders byte-for-byte.",
-    facts: ["Knuth–Plass + Liang hyphenation", "subset fonts, tagged PDF", "hand-rolled zlib/DEFLATE"]
+    facts: [
+      "Knuth–Plass + Liang hyphenation",
+      "subset fonts, tagged PDF",
+      "hand-rolled zlib/DEFLATE",
+    ],
   },
   wasm: {
     title: "WASM ABI",
     body: "The same core compiled to wasm32 with a thin wasm-bindgen adapter. Fonts and images arrive as bytes from the host. CI proves the browser build renders byte-identical HTML and PDF to the native binary.",
-    facts: ["1.8 MB gzipped, fonts included", "native ↔ wasm parity gate", "no threads, fs, or network"]
-  }
+    facts: [
+      "1.8 MB gzipped, fonts included",
+      "native ↔ wasm parity gate",
+      "no threads, fs, or network",
+    ],
+  },
 };
 
 function initPipeline() {
@@ -83,7 +98,8 @@ function initPipeline() {
     facts.replaceChildren();
     for (const fact of info.facts) {
       const chip = document.createElement("span");
-      chip.className = "inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.15em] text-emerald-400/90";
+      chip.className =
+        "inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.15em] text-emerald-400/90";
       chip.textContent = fact;
       facts.appendChild(chip);
     }
@@ -129,8 +145,14 @@ function initKnuth() {
   const slider = document.getElementById("kp-slider");
   const widthLabel = document.getElementById("kp-width-label");
   const panels = {
-    greedy: { host: document.getElementById("kp-greedy"), stats: document.getElementById("kp-greedy-stats") },
-    optimal: { host: document.getElementById("kp-optimal"), stats: document.getElementById("kp-optimal-stats") }
+    greedy: {
+      host: document.getElementById("kp-greedy"),
+      stats: document.getElementById("kp-greedy-stats"),
+    },
+    optimal: {
+      host: document.getElementById("kp-optimal"),
+      stats: document.getElementById("kp-optimal-stats"),
+    },
   };
 
   const canvas = document.createElement("canvas");
@@ -160,11 +182,12 @@ function initKnuth() {
     natural += spaces * spaceWidth;
     const diff = target - natural;
     let ratio;
-    if (diff >= 0) ratio = spaces > 0 ? diff / (spaces * stretch) : (diff > 2 ? Infinity : 0);
+    if (diff >= 0) ratio = spaces > 0 ? diff / (spaces * stretch) : diff > 2 ? Infinity : 0;
     else ratio = spaces > 0 ? diff / (spaces * shrink) : -Infinity;
-    const badness = ratio < -1 || !Number.isFinite(ratio)
-      ? Infinity
-      : Math.min(10000, 100 * Math.pow(Math.abs(ratio), 3));
+    const badness =
+      ratio < -1 || !Number.isFinite(ratio)
+        ? Infinity
+        : Math.min(10000, 100 * Math.abs(ratio) ** 3);
     return { natural, spaces, ratio, badness };
   }
 
@@ -200,7 +223,7 @@ function initKnuth() {
         const isLast = j === n;
         const b = isLast ? (m.ratio < -1 ? Infinity : 0) : m.badness;
         if (b === Infinity) continue;
-        const demerits = Math.pow(1 + b / 100, 2);
+        const demerits = (1 + b / 100) ** 2;
         if (cost[i] + demerits < cost[j]) {
           cost[j] = cost[i] + demerits;
           prev[j] = i;
@@ -245,11 +268,11 @@ function initKnuth() {
       const extra = isLast || m.spaces === 0 ? 0 : (target - m.natural) / m.spaces;
       line.style.wordSpacing = `${extra.toFixed(3)}px`;
       line.textContent = words.slice(i, j).join(" ");
-      const b100 = isLast ? 0 : (Number.isFinite(m.badness) ? m.badness : 10000);
+      const b100 = isLast ? 0 : Number.isFinite(m.badness) ? m.badness : 10000;
       line.title = isLast
         ? "last line — set solid, no justification"
         : `adjustment ratio r = ${m.ratio.toFixed(2)} · badness ${Math.round(b100)}`;
-      total += Math.pow(1 + b100 / 100, 2);
+      total += (1 + b100 / 100) ** 2;
       if (!isLast) worst = Math.max(worst, Math.abs(m.ratio));
       host.appendChild(line);
     }
@@ -265,9 +288,10 @@ function initKnuth() {
     const verdict = document.getElementById("kp-verdict");
     if (verdict) {
       const pct = g > 0 ? Math.max(0, Math.min(99.9, (1 - o / g) * 100)) : 0;
-      verdict.textContent = pct > 0.5
-        ? `Total-fit cut demerits by ${pct.toFixed(pct > 99 ? 1 : 0)}% at this measure.`
-        : "At this measure both strategies agree — drag the slider.";
+      verdict.textContent =
+        pct > 0.5
+          ? `Total-fit cut demerits by ${pct.toFixed(pct > 99 ? 1 : 0)}% at this measure.`
+          : "At this measure both strategies agree — drag the slider.";
     }
   }
 
@@ -276,10 +300,12 @@ function initKnuth() {
   // Measurements taken before the webfont finished loading used fallback
   // metrics; re-MEASURE (not just re-render) once fonts settle.
   if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(() => {
-      measure();
-      update();
-    }).catch(() => {});
+    document.fonts.ready
+      .then(() => {
+        measure();
+        update();
+      })
+      .catch(() => {});
   }
 }
 
@@ -288,8 +314,8 @@ function initKnuth() {
 /* ================================================================== */
 
 const GLYPH_FULL_BYTES = 269 * 1024; // bundled body face, full TTF
-const GLYPH_OVERHEAD = 3.2 * 1024;   // tables that always ship
-const GLYPH_COST = 210;              // approx outline bytes per kept glyph
+const GLYPH_OVERHEAD = 3.2 * 1024; // tables that always ship
+const GLYPH_COST = 210; // approx outline bytes per kept glyph
 
 function initSubset() {
   const root = document.getElementById("viz-subset");
@@ -307,7 +333,8 @@ function initSubset() {
   const cells = new Map();
   for (const g of glyphs) {
     const cell = document.createElement("span");
-    cell.className = "flex items-center justify-center rounded border border-white/5 bg-white/[0.02] font-mono text-[11px] text-slate-600 transition-colors duration-300";
+    cell.className =
+      "flex items-center justify-center rounded border border-white/5 bg-white/[0.02] font-mono text-[11px] text-slate-600 transition-colors duration-300";
     cell.textContent = g;
     grid.appendChild(cell);
     cells.set(g, cell);
@@ -342,11 +369,42 @@ function initSubset() {
 /* ================================================================== */
 
 const USUAL_CRATES = [
-  "comrak", "syntect", "onig", "onig_sys", "regex", "regex-syntax", "aho-corasick",
-  "memchr", "serde", "serde_derive", "syn", "quote", "proc-macro2", "unicode-ident",
-  "plist", "yaml-rust", "walkdir", "printpdf", "lopdf", "image", "png", "fdeflate",
-  "flate2", "miniz_oxide", "ttf-parser", "fontdb", "unicode-bidi", "unicode-script",
-  "bitflags", "log", "cfg-if", "once_cell", "thiserror", "adler2", "crc32fast", "base64"
+  "comrak",
+  "syntect",
+  "onig",
+  "onig_sys",
+  "regex",
+  "regex-syntax",
+  "aho-corasick",
+  "memchr",
+  "serde",
+  "serde_derive",
+  "syn",
+  "quote",
+  "proc-macro2",
+  "unicode-ident",
+  "plist",
+  "yaml-rust",
+  "walkdir",
+  "printpdf",
+  "lopdf",
+  "image",
+  "png",
+  "fdeflate",
+  "flate2",
+  "miniz_oxide",
+  "ttf-parser",
+  "fontdb",
+  "unicode-bidi",
+  "unicode-script",
+  "bitflags",
+  "log",
+  "cfg-if",
+  "once_cell",
+  "thiserror",
+  "adler2",
+  "crc32fast",
+  "base64",
 ];
 
 function initDeps() {
@@ -366,10 +424,22 @@ function initDeps() {
     return node;
   }
 
-  const center = el("circle", { cx, cy, r: 26, fill: "rgba(239,68,68,0.12)", stroke: "rgba(239,68,68,0.6)", "stroke-width": 1.5 });
+  const center = el("circle", {
+    cx,
+    cy,
+    r: 26,
+    fill: "rgba(239,68,68,0.12)",
+    stroke: "rgba(239,68,68,0.6)",
+    "stroke-width": 1.5,
+  });
   const centerLabel = el("text", {
-    x: cx, y: cy + 4, "text-anchor": "middle", fill: "#fca5a5",
-    "font-size": 10, "font-weight": 800, "font-family": "var(--font-mono)"
+    x: cx,
+    y: cy + 4,
+    "text-anchor": "middle",
+    fill: "#fca5a5",
+    "font-size": 10,
+    "font-weight": 800,
+    "font-family": "var(--font-mono)",
   });
   centerLabel.textContent = "your renderer";
 
@@ -381,27 +451,37 @@ function initDeps() {
     const x = cx + Math.cos(angle) * (ring + jitter);
     const y = cy + Math.sin(angle) * (ring + jitter) * 0.78;
     const edge = el("line", {
-      x1: cx, y1: cy, x2: x, y2: y,
-      stroke: "rgba(148,163,184,0.18)", "stroke-width": 0.7
+      x1: cx,
+      y1: cy,
+      x2: x,
+      y2: y,
+      stroke: "rgba(148,163,184,0.18)",
+      "stroke-width": 0.7,
     });
     svg.appendChild(edge);
     const dot = el("circle", { cx: x, cy: y, r: 3.4, fill: "rgba(148,163,184,0.45)" });
     const label = el("text", {
-      x, y: y - 7, "text-anchor": "middle", fill: "rgba(148,163,184,0.6)",
-      "font-size": 8.5, "font-family": "var(--font-mono)"
+      x,
+      y: y - 7,
+      "text-anchor": "middle",
+      fill: "rgba(148,163,184,0.6)",
+      "font-size": 8.5,
+      "font-family": "var(--font-mono)",
     });
     label.textContent = name;
     if (!reducedMotion) {
-      const delay = `${(i * 45)}ms`;
+      const delay = `${i * 45}ms`;
       for (const node of [edge, dot, label]) {
         node.style.opacity = "0";
         node.style.transition = `opacity 600ms var(--ease-stripe) ${delay}`;
       }
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        edge.style.opacity = "1";
-        dot.style.opacity = "1";
-        label.style.opacity = "1";
-      }));
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          edge.style.opacity = "1";
+          dot.style.opacity = "1";
+          label.style.opacity = "1";
+        }),
+      );
     }
     svg.appendChild(dot);
     svg.appendChild(label);
@@ -426,7 +506,7 @@ function animateCount(node) {
   const dur = 1200;
   function tick(t) {
     const p = Math.min(1, (t - t0) / dur);
-    const eased = 1 - Math.pow(1 - p, 3);
+    const eased = 1 - (1 - p) ** 3;
     node.textContent = `${Math.round(target * eased)}${suffix}`;
     if (p < 1) requestAnimationFrame(tick);
   }

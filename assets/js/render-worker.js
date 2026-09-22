@@ -14,7 +14,7 @@
    and .wasm always update as one unit: edge caches can never pair an old
    glue file with a new binary. Bump this path (and the worker URL ?v= in
    playground.js) when refreshing the engine. */
-import { init, capabilities, renderHtml, renderPdf } from "../wasm/0.4.2/franken_markdown.js";
+import { capabilities, init, renderHtml, renderPdf } from "../wasm/0.4.2/franken_markdown.js";
 
 const booted = (async () => {
   await init();
@@ -34,9 +34,8 @@ self.onmessage = async (event) => {
   try {
     await booted;
     const t0 = performance.now();
-    const output = format === "pdf"
-      ? await renderPdf(markdown, options)
-      : await renderHtml(markdown, options);
+    const output =
+      format === "pdf" ? await renderPdf(markdown, options) : await renderHtml(markdown, options);
     const ms = performance.now() - t0;
     self.postMessage(
       {
@@ -47,9 +46,9 @@ self.onmessage = async (event) => {
         bytes: output.bytes,
         diagnostics: output.diagnostics,
         sourceLength: output.sourceLength,
-        ms
+        ms,
       },
-      [output.bytes.buffer]
+      [output.bytes.buffer],
     );
   } catch (error) {
     self.postMessage({ type: "result", id, format, ok: false, error: describe(error) });

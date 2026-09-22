@@ -151,7 +151,7 @@ document. Nested definitions are collected too.
 - [x] GitHub alerts (\`NOTE\` / \`TIP\` / \`IMPORTANT\` / \`WARNING\` / \`CAUTION\`)
 - [x] \`[[TOC]]\` / \`[TOC]\` / \`[[_TOC_]]\`
 - [ ] HTML MathML (not in this build)
-`
+`,
 };
 
 const els = {
@@ -178,7 +178,7 @@ const els = {
   stats: document.getElementById("pg-stats"),
   diag: document.getElementById("pg-diag"),
   count: document.getElementById("pg-count"),
-  previewLabel: document.getElementById("pg-preview-label")
+  previewLabel: document.getElementById("pg-preview-label"),
 };
 
 /* --- URL fragment codec: the document travels inside the link. ---
@@ -197,7 +197,10 @@ function b64urlEncode(bytes) {
 }
 
 function b64urlDecode(text) {
-  const b64 = text.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(text.length / 4) * 4, "=");
+  const b64 = text
+    .replace(/-/g, "+")
+    .replace(/_/g, "/")
+    .padEnd(Math.ceil(text.length / 4) * 4, "=");
   const binary = atob(b64);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
@@ -217,7 +220,7 @@ function parseFragment() {
     doc: params.get("doc"),
     zdoc: params.get("zdoc"),
     fmt: params.get("fmt"),
-    view: params.get("view")
+    view: params.get("view"),
   };
 }
 
@@ -227,19 +230,32 @@ function parseFragment() {
 async function decodeFragmentDoc(frag) {
   if (frag.zdoc != null) {
     if (typeof DecompressionStream === "undefined") {
-      return { error: "This browser cannot decompress this share link (no CompressionStream support). Ask the sender to re-share from a browser without compression, or open the link in a current browser." };
+      return {
+        error:
+          "This browser cannot decompress this share link (no CompressionStream support). Ask the sender to re-share from a browser without compression, or open the link in a current browser.",
+      };
     }
     try {
-      return { doc: new TextDecoder().decode(await pipeBytes(b64urlDecode(frag.zdoc), DecompressionStream, "deflate-raw")) };
+      return {
+        doc: new TextDecoder().decode(
+          await pipeBytes(b64urlDecode(frag.zdoc), DecompressionStream, "deflate-raw"),
+        ),
+      };
     } catch {
-      return { error: "The document in this share link is corrupted or truncated (some chat apps shorten long URLs). Ask the sender for the full link." };
+      return {
+        error:
+          "The document in this share link is corrupted or truncated (some chat apps shorten long URLs). Ask the sender for the full link.",
+      };
     }
   }
   if (frag.doc != null) {
     try {
       return { doc: new TextDecoder().decode(b64urlDecode(frag.doc)) };
     } catch {
-      return { error: "The document in this share link is corrupted or truncated (some chat apps shorten long URLs). Ask the sender for the full link." };
+      return {
+        error:
+          "The document in this share link is corrupted or truncated (some chat apps shorten long URLs). Ask the sender for the full link.",
+      };
     }
   }
   return {};
@@ -266,7 +282,7 @@ function bootPlayground() {
   const pendingResolvers = new Map();
   const live = {
     html: { running: false, dirty: false },
-    pdf: { running: false, dirty: false }
+    pdf: { running: false, dirty: false },
   };
   // Last successfully presented render per format, with the doc version it saw.
   const presented = { html: null, pdf: null };
@@ -352,7 +368,7 @@ function bootPlayground() {
     const options = {
       font: els.font.value,
       darkMode: els.dark.value,
-      metadataEpochSeconds: 1700000000
+      metadataEpochSeconds: 1700000000,
     };
     if (format === "pdf" && els.linenos.checked) {
       options.codeLineNumbers = true;
@@ -503,7 +519,9 @@ function bootPlayground() {
     els.maximize.querySelector(".pg-max-label").textContent = on ? "Exit" : "Maximize";
     // Keep the rest of the page out of the tab order / accessibility tree
     // while the playground overlays it (no-op where inert is unsupported).
-    for (const node of document.querySelectorAll("body > .skip-link, #site-header, #mobile-menu, footer, main > section:not(#playground), #playground > :not(#pg-root)")) {
+    for (const node of document.querySelectorAll(
+      "body > .skip-link, #site-header, #mobile-menu, footer, main > section:not(#playground), #playground > :not(#pg-root)",
+    )) {
       node.toggleAttribute("inert", on);
     }
     // Exiting should also retire a #view=max fragment, or the next reload
@@ -555,7 +573,14 @@ function bootPlayground() {
       els.share.textContent = "⚡ Share";
     }, 2200);
     if (url.length > 30000) {
-      showDiagnostics([{ severity: "warning", start: 0, end: 0, message: `share link is ${url.length.toLocaleString()} characters — some chat apps truncate very long URLs` }]);
+      showDiagnostics([
+        {
+          severity: "warning",
+          start: 0,
+          end: 0,
+          message: `share link is ${url.length.toLocaleString()} characters — some chat apps truncate very long URLs`,
+        },
+      ]);
     } else {
       els.stats.textContent = `share link: ${url.length.toLocaleString()} chars — the document travels inside the URL`;
     }
@@ -609,9 +634,10 @@ function bootPlayground() {
     const cached = presented[format];
     let res;
     try {
-      res = cached && cached.version === docVersion
-        ? cached.res
-        : await workerRender(format, els.input.value, currentOptions(format));
+      res =
+        cached && cached.version === docVersion
+          ? cached.res
+          : await workerRender(format, els.input.value, currentOptions(format));
     } catch (error) {
       showFatal(`Download render failed: ${error.message}`);
       return;
@@ -637,15 +663,25 @@ function bootPlayground() {
     invalidate();
   });
 
-  els.input.addEventListener("scroll", () => {
-    els.highlight.scrollTop = els.input.scrollTop;
-    els.highlight.scrollLeft = els.input.scrollLeft;
-  }, { passive: true });
+  els.input.addEventListener(
+    "scroll",
+    () => {
+      els.highlight.scrollTop = els.input.scrollTop;
+      els.highlight.scrollLeft = els.input.scrollLeft;
+    },
+    { passive: true },
+  );
 
   els.input.addEventListener("keydown", (event) => {
     // Plain Tab indents; Shift+Tab (and modified Tab) stays a focus move so
     // keyboard users are never trapped in the editor.
-    if (event.key === "Tab" && !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
+    if (
+      event.key === "Tab" &&
+      !event.shiftKey &&
+      !event.ctrlKey &&
+      !event.altKey &&
+      !event.metaKey
+    ) {
       event.preventDefault();
       els.input.setRangeText("  ", els.input.selectionStart, els.input.selectionEnd, "end");
       refreshEditor();
@@ -658,7 +694,9 @@ function bootPlayground() {
   els.downloadHtml.addEventListener("click", () => download("html"));
   els.downloadPdf.addEventListener("click", () => download("pdf"));
   els.maximize.addEventListener("click", () => setMaximized(!maximized));
-  els.share.addEventListener("click", () => { void share(); });
+  els.share.addEventListener("click", () => {
+    void share();
+  });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && maximized) setMaximized(false);
   });
@@ -668,11 +706,12 @@ function bootPlayground() {
       if (frag.view === "max") setMaximized(true);
       if (frag.fmt === "pdf") setFormat("pdf");
       const result = await decodeFragmentDoc(frag);
-      const doc = result.doc !== undefined
-        ? result.doc
-        : result.error
-          ? `# This share link did not decode\n\n${result.error}\n`
-          : undefined;
+      const doc =
+        result.doc !== undefined
+          ? result.doc
+          : result.error
+            ? `# This share link did not decode\n\n${result.error}\n`
+            : undefined;
       if (doc !== undefined && doc !== els.input.value) {
         els.input.value = doc;
         refreshEditor();

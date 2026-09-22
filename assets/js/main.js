@@ -18,12 +18,16 @@ if (header) {
     header.classList.toggle("border-transparent", !scrolled);
     ticking = false;
   };
-  window.addEventListener("scroll", () => {
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(apply);
-    }
-  }, { passive: true });
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(apply);
+      }
+    },
+    { passive: true },
+  );
   apply();
 }
 
@@ -34,9 +38,7 @@ const mobileBackdrop = document.getElementById("mobile-menu-backdrop");
 if (menuButton && mobileMenu) {
   let lastFocus = null;
   const focusables = () =>
-    [...mobileMenu.querySelectorAll("a, button")].filter(
-      (el) => !el.hasAttribute("disabled")
-    );
+    [...mobileMenu.querySelectorAll("a, button")].filter((el) => !el.hasAttribute("disabled"));
   const setOpen = (open) => {
     mobileMenu.classList.toggle("translate-x-full", !open);
     if (mobileBackdrop) mobileBackdrop.hidden = !open;
@@ -81,14 +83,17 @@ if (menuButton && mobileMenu) {
 /* --- Scroll reveals --- */
 const revealables = document.querySelectorAll(".reveal");
 if ("IntersectionObserver" in window && !reducedMotion) {
-  const io = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("revealed");
-        io.unobserve(entry.target);
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("revealed");
+          io.unobserve(entry.target);
+        }
       }
-    }
-  }, { rootMargin: "-40px" });
+    },
+    { rootMargin: "-40px" },
+  );
   for (const node of revealables) io.observe(node);
 } else {
   for (const node of revealables) node.classList.add("revealed");
@@ -96,14 +101,17 @@ if ("IntersectionObserver" in window && !reducedMotion) {
 
 /* --- Count-up stats (outside viz containers) --- */
 if ("IntersectionObserver" in window) {
-  const io = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (entry.isIntersecting) {
-        animateCount(entry.target);
-        io.unobserve(entry.target);
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          animateCount(entry.target);
+          io.unobserve(entry.target);
+        }
       }
-    }
-  }, { rootMargin: "0px" });
+    },
+    { rootMargin: "0px" },
+  );
   for (const node of document.querySelectorAll("[data-count-to]")) {
     // Counters inside the deps visualization animate when that viz
     // initializes; a complex :not() selector here would throw on older
@@ -147,28 +155,34 @@ if (eye) {
   let rect = null;
   let raf = 0;
 
-  const refreshRect = () => { rect = eye.getBoundingClientRect(); };
+  const refreshRect = () => {
+    rect = eye.getBoundingClientRect();
+  };
   refreshRect();
   window.addEventListener("scroll", refreshRect, { passive: true });
   window.addEventListener("resize", refreshRect, { passive: true });
 
   if (!reducedMotion) {
-    window.addEventListener("mousemove", (event) => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        if (!rect) return;
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const dx = event.clientX - centerX;
-        const dy = event.clientY - centerY;
-        const distance = Math.hypot(dx, dy);
-        const angle = Math.atan2(dy, dx);
-        const moveDist = Math.min(rect.width / 4, distance / 15);
-        iris.style.transform = `translate(${Math.cos(angle) * moveDist}px, ${Math.sin(angle) * moveDist}px)`;
-        if (veins) veins.style.opacity = String(Math.max(0.05, 1 - distance / 400) * 0.45);
-      });
-    }, { passive: true });
+    window.addEventListener(
+      "mousemove",
+      (event) => {
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          if (!rect) return;
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          const dx = event.clientX - centerX;
+          const dy = event.clientY - centerY;
+          const distance = Math.hypot(dx, dy);
+          const angle = Math.atan2(dy, dx);
+          const moveDist = Math.min(rect.width / 4, distance / 15);
+          iris.style.transform = `translate(${Math.cos(angle) * moveDist}px, ${Math.sin(angle) * moveDist}px)`;
+          if (veins) veins.style.opacity = String(Math.max(0.05, 1 - distance / 400) * 0.45);
+        });
+      },
+      { passive: true },
+    );
 
     window.setInterval(() => {
       if (Math.random() > 0.8) {
@@ -197,7 +211,7 @@ if (terminal) {
     { text: "$ fmd README.md --to pdf --out rerun.pdf   # render again", cls: "cmd" },
     { text: "$ sha256sum README.pdf rerun.pdf", cls: "cmd" },
     { text: "  09a7d729c37b92cc...  README.pdf", cls: "out" },
-    { text: "  09a7d729c37b92cc...  rerun.pdf", cls: "out" }
+    { text: "  09a7d729c37b92cc...  rerun.pdf", cls: "out" },
   ];
 
   function lineHtml(line, upTo) {
@@ -205,7 +219,8 @@ if (terminal) {
     let html = "";
     for (const ch of shown) {
       if (ch === "$") html += `<span class="text-emerald-500 font-bold">$</span>`;
-      else if (line.cls === "cmd") html += `<span class="text-white font-bold">${escapeChar(ch)}</span>`;
+      else if (line.cls === "cmd")
+        html += `<span class="text-white font-bold">${escapeChar(ch)}</span>`;
       else if (/[0-9,]/.test(ch)) html += `<span class="text-white">${escapeChar(ch)}</span>`;
       else html += `<span class="text-slate-500">${escapeChar(ch)}</span>`;
     }
@@ -225,7 +240,9 @@ if (terminal) {
       const upTo = i < lineIndex ? LINES[i].text.length : charIndex;
       html += lineHtml(LINES[i], upTo) + "\n";
     }
-    terminal.innerHTML = html + `<span class="caret-blink inline-block w-1.5 h-4 bg-emerald-500 align-text-bottom"></span>`;
+    terminal.innerHTML =
+      html +
+      `<span class="caret-blink inline-block w-1.5 h-4 bg-emerald-500 align-text-bottom"></span>`;
   }
 
   if (reducedMotion) {

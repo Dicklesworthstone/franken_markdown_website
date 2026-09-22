@@ -153,13 +153,18 @@ export function highlightMarkdown(source) {
     // Blockquote
     const bq = line.match(/^(\s{0,3}(?:>\s?)+)(.*)$/);
     if (bq) {
-      out.push(span("md-marker", bq[1]) + `<span class="md-quote">${highlightInline(bq[2])}</span>`);
+      out.push(
+        span("md-marker", bq[1]) + `<span class="md-quote">${highlightInline(bq[2])}</span>`,
+      );
       continue;
     }
 
     // Table row
-    if (/^\s*\|/.test(line) || /^\s*[^|]+\|[^|]+/.test(line) && /\|/.test(line) && /^[\s|:\-]+$/.test(line)) {
-      if (/^[\s|:\-]+$/.test(line)) {
+    if (
+      /^\s*\|/.test(line) ||
+      (/^\s*[^|]+\|[^|]+/.test(line) && /\|/.test(line) && /^[\s|:-]+$/.test(line))
+    ) {
+      if (/^[\s|:-]+$/.test(line)) {
         out.push(span("md-marker", line));
         continue;
       }
@@ -188,8 +193,11 @@ export function highlightMarkdown(source) {
     const ref = line.match(/^(\s{0,3}\[)([^\]]+)(\]:\s*)(\S+)(.*)$/);
     if (ref) {
       out.push(
-        span("md-marker", ref[1]) + span("md-link", ref[2]) + span("md-marker", ref[3]) +
-        span("md-url", ref[4]) + span("md-em", ref[5])
+        span("md-marker", ref[1]) +
+          span("md-link", ref[2]) +
+          span("md-marker", ref[3]) +
+          span("md-url", ref[4]) +
+          span("md-em", ref[5]),
       );
       continue;
     }
