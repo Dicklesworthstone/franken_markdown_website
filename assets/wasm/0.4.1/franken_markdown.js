@@ -1,9 +1,9 @@
 import initWasm, {
-  capabilities as wasmCapabilities,
   renderHtmlConfigured,
-  renderHtmlConfiguredWithFonts,
   renderHtmlConfiguredMulti,
-  renderPdfConfiguredMulti
+  renderHtmlConfiguredWithFonts,
+  renderPdfConfiguredMulti,
+  capabilities as wasmCapabilities,
 } from "./pkg/franken_markdown.js";
 
 let initPromise = null;
@@ -55,8 +55,8 @@ export async function renderHtml(markdown, options = {}) {
         fontWeightsForSlots(fontAssets),
         destinations,
         flatBytes,
-        lengths
-      )
+        lengths,
+      ),
     );
   }
   if (fontAssets.length > 0) {
@@ -73,8 +73,8 @@ export async function renderHtml(markdown, options = {}) {
         fontBytesForSlot(fontAssets, "body-italic"),
         fontBytesForSlot(fontAssets, "body-bold-italic"),
         fontBytesForSlot(fontAssets, "mono-regular"),
-        fontWeightsForSlots(fontAssets)
-      )
+        fontWeightsForSlots(fontAssets),
+      ),
     );
   }
   return normalizeResult(
@@ -84,8 +84,8 @@ export async function renderHtml(markdown, options = {}) {
       darkModeOption(options.darkMode),
       verbatimOption(options.title),
       verbatimOption(options.customCss),
-      Boolean(options.allowRawHtml)
-    )
+      Boolean(options.allowRawHtml),
+    ),
   );
 }
 
@@ -129,8 +129,8 @@ export async function renderPdf(markdown, options = {}) {
       numberOption(options.baseFontSize),
       numberOption(options.headingScale),
       numberOption(options.tableFontSize),
-      Boolean(options.pageNumbers)
-    )
+      Boolean(options.pageNumbers),
+    ),
   );
 }
 
@@ -139,7 +139,7 @@ export async function createRenderer(input) {
   return Object.freeze({
     capabilities,
     renderHtml,
-    renderPdf
+    renderPdf,
   });
 }
 
@@ -181,7 +181,7 @@ function normalizeResult(result) {
     filename(baseName = "document") {
       const cleanBase = String(baseName).trim() || "document";
       return `${cleanBase}.${output.extension}`;
-    }
+    },
   };
   return Object.freeze(output);
 }
@@ -246,12 +246,11 @@ function epochOption(value) {
   }
   if (!Number.isSafeInteger(epoch) || epoch < 0) {
     throw new TypeError(
-      "metadataEpochSeconds must be a finite non-negative integer <= Number.MAX_SAFE_INTEGER"
+      "metadataEpochSeconds must be a finite non-negative integer <= Number.MAX_SAFE_INTEGER",
     );
   }
   return epoch;
 }
-
 
 /**
  * Coerce an optional typography override to a finite number for the core
@@ -320,11 +319,11 @@ function fontSlotOption(value, label) {
     "body-bold",
     "body-italic",
     "body-bold-italic",
-    "mono-regular"
+    "mono-regular",
   ]);
   if (slot === undefined || !allowed.has(slot)) {
     throw new TypeError(
-      `${label} must be one of body-regular, body-bold, body-italic, body-bold-italic, mono-regular`
+      `${label} must be one of body-regular, body-bold, body-italic, body-bold-italic, mono-regular`,
     );
   }
   return slot;
@@ -336,13 +335,7 @@ function fontBytesForSlot(assets, slot) {
 }
 
 function fontWeightsForSlots(assets) {
-  const slots = [
-    "body-regular",
-    "body-bold",
-    "body-italic",
-    "body-bold-italic",
-    "mono-regular"
-  ];
+  const slots = ["body-regular", "body-bold", "body-italic", "body-bold-italic", "mono-regular"];
   return Uint32Array.from(slots, (slot) => {
     const asset = assets.find((entry) => entry.slot === slot);
     return asset === undefined || asset.weight === undefined ? 0 : asset.weight;

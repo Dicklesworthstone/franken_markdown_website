@@ -1,7 +1,7 @@
 import initWasm, {
-  capabilities as wasmCapabilities,
   renderHtmlConfiguredAdvanced,
-  renderPdfConfiguredMulti
+  renderPdfConfiguredMulti,
+  capabilities as wasmCapabilities,
 } from "./pkg/franken_markdown.js";
 
 let initPromise = null;
@@ -54,8 +54,8 @@ export async function renderHtml(markdown, options = {}) {
       fontWeightsForSlots(fontAssets),
       destinations,
       flatBytes,
-      lengths
-    )
+      lengths,
+    ),
   );
 }
 
@@ -64,7 +64,8 @@ export async function renderPdf(markdown, options = {}) {
   const pdfImages = pdfImagesOption(options.pdfImages);
   const fontAssets = fontAssetsOption(options.fontAssets);
   const fontScale = fontScaleOption(options.fontScale ?? options.typeSize);
-  const baseFontSize = numberOption(options.baseFontSize) ?? (fontScale !== undefined ? 11 * fontScale : undefined);
+  const baseFontSize =
+    numberOption(options.baseFontSize) ?? (fontScale !== undefined ? 11 * fontScale : undefined);
 
   // Flatten any number of images into the three parallel arrays the core ABI
   // accepts (wasm-bindgen cannot pass a Vec<Vec<u8>>): a destination per image,
@@ -101,8 +102,8 @@ export async function renderPdf(markdown, options = {}) {
       baseFontSize,
       numberOption(options.headingScale),
       numberOption(options.tableFontSize),
-      Boolean(options.pageNumbers)
-    )
+      Boolean(options.pageNumbers),
+    ),
   );
 }
 
@@ -111,7 +112,7 @@ export async function createRenderer(input) {
   return Object.freeze({
     capabilities,
     renderHtml,
-    renderPdf
+    renderPdf,
   });
 }
 
@@ -153,7 +154,7 @@ function normalizeResult(result) {
     filename(baseName = "document") {
       const cleanBase = String(baseName).trim() || "document";
       return `${cleanBase}.${output.extension}`;
-    }
+    },
   };
   return Object.freeze(output);
 }
@@ -218,12 +219,11 @@ function epochOption(value) {
   }
   if (!Number.isSafeInteger(epoch) || epoch < 0) {
     throw new TypeError(
-      "metadataEpochSeconds must be a finite non-negative integer <= Number.MAX_SAFE_INTEGER"
+      "metadataEpochSeconds must be a finite non-negative integer <= Number.MAX_SAFE_INTEGER",
     );
   }
   return epoch;
 }
-
 
 /**
  * Coerce an optional typography override to a finite number for the core
@@ -321,7 +321,9 @@ function fontScaleOption(value) {
     if (Number.isFinite(parsed) && parsed > 0) {
       return Math.min(3.0, Math.max(0.5, parsed));
     }
-    throw new TypeError(`unknown fontScale '${value}'. Valid choices: xs, sm, md, lg, xl, 2xl, or a number/percentage.`);
+    throw new TypeError(
+      `unknown fontScale '${value}'. Valid choices: xs, sm, md, lg, xl, 2xl, or a number/percentage.`,
+    );
   }
   throw new TypeError("fontScale must be a number or string");
 }
@@ -378,11 +380,11 @@ function fontSlotOption(value, label) {
     "body-bold",
     "body-italic",
     "body-bold-italic",
-    "mono-regular"
+    "mono-regular",
   ]);
   if (slot === undefined || !allowed.has(slot)) {
     throw new TypeError(
-      `${label} must be one of body-regular, body-bold, body-italic, body-bold-italic, mono-regular`
+      `${label} must be one of body-regular, body-bold, body-italic, body-bold-italic, mono-regular`,
     );
   }
   return slot;
@@ -394,13 +396,7 @@ function fontBytesForSlot(assets, slot) {
 }
 
 function fontWeightsForSlots(assets) {
-  const slots = [
-    "body-regular",
-    "body-bold",
-    "body-italic",
-    "body-bold-italic",
-    "mono-regular"
-  ];
+  const slots = ["body-regular", "body-bold", "body-italic", "body-bold-italic", "mono-regular"];
   return Uint32Array.from(slots, (slot) => {
     const asset = assets.find((entry) => entry.slot === slot);
     return asset === undefined || asset.weight === undefined ? 0 : asset.weight;

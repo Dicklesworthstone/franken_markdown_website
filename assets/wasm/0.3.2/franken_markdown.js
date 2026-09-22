@@ -1,8 +1,8 @@
 import initWasm, {
-  capabilities as wasmCapabilities,
   renderHtmlConfigured,
   renderHtmlConfiguredWithFonts,
-  renderPdfConfiguredMulti
+  renderPdfConfiguredMulti,
+  capabilities as wasmCapabilities,
 } from "./pkg/franken_markdown.js";
 
 let initPromise = null;
@@ -40,8 +40,8 @@ export async function renderHtml(markdown, options = {}) {
         fontBytesForSlot(fontAssets, "body-bold"),
         fontBytesForSlot(fontAssets, "body-italic"),
         fontBytesForSlot(fontAssets, "body-bold-italic"),
-        fontBytesForSlot(fontAssets, "mono-regular")
-      )
+        fontBytesForSlot(fontAssets, "mono-regular"),
+      ),
     );
   }
   return normalizeResult(
@@ -51,8 +51,8 @@ export async function renderHtml(markdown, options = {}) {
       darkModeOption(options.darkMode),
       verbatimOption(options.title),
       verbatimOption(options.customCss),
-      Boolean(options.allowRawHtml)
-    )
+      Boolean(options.allowRawHtml),
+    ),
   );
 }
 
@@ -91,8 +91,8 @@ export async function renderPdf(markdown, options = {}) {
       fontBytesForSlot(fontAssets, "body-bold"),
       fontBytesForSlot(fontAssets, "body-italic"),
       fontBytesForSlot(fontAssets, "body-bold-italic"),
-      fontBytesForSlot(fontAssets, "mono-regular")
-    )
+      fontBytesForSlot(fontAssets, "mono-regular"),
+    ),
   );
 }
 
@@ -101,7 +101,7 @@ export async function createRenderer(input) {
   return Object.freeze({
     capabilities,
     renderHtml,
-    renderPdf
+    renderPdf,
   });
 }
 
@@ -143,7 +143,7 @@ function normalizeResult(result) {
     filename(baseName = "document") {
       const cleanBase = String(baseName).trim() || "document";
       return `${cleanBase}.${output.extension}`;
-    }
+    },
   };
   return Object.freeze(output);
 }
@@ -208,7 +208,7 @@ function epochOption(value) {
   }
   if (!Number.isSafeInteger(epoch) || epoch < 0) {
     throw new TypeError(
-      "metadataEpochSeconds must be a finite non-negative integer <= Number.MAX_SAFE_INTEGER"
+      "metadataEpochSeconds must be a finite non-negative integer <= Number.MAX_SAFE_INTEGER",
     );
   }
   return epoch;
@@ -266,11 +266,11 @@ function fontSlotOption(value, label) {
     "body-bold",
     "body-italic",
     "body-bold-italic",
-    "mono-regular"
+    "mono-regular",
   ]);
   if (slot === undefined || !allowed.has(slot)) {
     throw new TypeError(
-      `${label} must be one of body-regular, body-bold, body-italic, body-bold-italic, mono-regular`
+      `${label} must be one of body-regular, body-bold, body-italic, body-bold-italic, mono-regular`,
     );
   }
   return slot;

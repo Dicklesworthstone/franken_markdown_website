@@ -93,10 +93,12 @@ export interface FmdRenderer {
   renderPdf(markdown: string, options?: FmdRenderOptions): Promise<FmdRenderOutput>;
 }
 
-export function init(input?: RequestInfo | URL | Response | BufferSource | WebAssembly.Module): Promise<void>;
+export function init(
+  input?: RequestInfo | URL | Response | BufferSource | WebAssembly.Module,
+): Promise<void>;
 export function capabilities(): Promise<FmdCapabilities>;
 export function renderHtml(markdown: string, options?: FmdRenderOptions): Promise<FmdRenderOutput>;
 export function renderPdf(markdown: string, options?: FmdRenderOptions): Promise<FmdRenderOutput>;
 export function createRenderer(
-  input?: RequestInfo | URL | Response | BufferSource | WebAssembly.Module
+  input?: RequestInfo | URL | Response | BufferSource | WebAssembly.Module,
 ): Promise<FmdRenderer>;
