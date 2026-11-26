@@ -1,0 +1,293 @@
+// Shared admission for worker and Flow publication. These options select the
+// existing native algorithms; this module never loads WASM or shapes text.
+function invalid(message) {
+  throw Object.assign(new TypeError(message), { code: "INVALID_OPTIONS" });
+}
+
+/** Single-document Markdown dialect, shared by the facade and worker admission.
+ * Omission retains the existing extended dialect and legacy binding shapes. */
+export function normalizeAuthoringProfile(value) {
+  if (value === undefined) return undefined;
+  if (value !== "commonmark-gfm" && value !== "gfm-plus")
+    invalid("profile must be commonmark-gfm or gfm-plus");
+  return value;
+}
+
+/** Source analysis accepts a grammar choice, without publication/resource grants. */
+export function normalizeAnalysisOptions(value = {}) {
+  if (!value || typeof value !== "object" || Array.isArray(value)
+      || ![Object.prototype, null].includes(Object.getPrototypeOf(value)))
+    invalid("analysis options must be a plain data object");
+  let profile;
+  for (const key of Reflect.ownKeys(value)) {
+    const field = Object.getOwnPropertyDescriptor(value, key);
+    if (key !== "profile" || !field || !Object.hasOwn(field, "value"))
+      invalid("analysis only accepts a data-valued authoring profile");
+    profile = normalizeAuthoringProfile(field.value);
+  }
+  return Object.freeze(profile === undefined ? {} : { profile });
+}
+
+/** Check that a renderer or analysis consumed the requested grammar. A legacy
+ * facade that ignores extra arguments cannot supply a successful receipt.
+ * Read only an own data property; an accessor is not an acknowledgment. */
+export function authoringProfileReceipt(report, expected, code = "UNSUPPORTED_WASM_PACKAGE") {
+  const field = report && typeof report === "object"
+    ? Object.getOwnPropertyDescriptor(report, "profile") : undefined;
+  const profile = field?.value;
+  if ((field && !Object.hasOwn(field, "value")) || profile !== expected
+      || (profile !== undefined && profile !== "commonmark-gfm" && profile !== "gfm-plus")) {
+    throw Object.assign(new Error("Document output did not acknowledge the requested Markdown dialect; rebuild matching renderer and worker packages"), { code });
+  }
+  return profile === undefined ? {} : { profile };
+}
+
+export const analysisAuthoringProfileReceipt = authoringProfileReceipt;
+
+/** Full layout verification accepts the PDF export controls, without granting
+ * archival certification or accepting settings for another output format. */
+const PDF_VERIFICATION_KEYS = [
+  "profile", "font", "darkMode", "fontScale", "typeSize", "title", "author",
+  "metadataEpochSeconds", "allowRawHtml", "codeLineNumbers", "pageNumbers",
+  "baseFontSize", "headingScale", "tableFontSize", "lang", "toc", "tocDepth",
+  "fitToPages", "microtype", "microtypeProtrusion", "typography",
+  "optimalPagination", "strictPagination", "footnoteBacklinks", "splitFootnotes",
+  "pdfImages", "fontAssets", "page", "running", "baselineGridPt",
+];
+
+function verificationRecord(value, keys, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value)
+      || ![Object.prototype, null].includes(Object.getPrototypeOf(value)))
+    invalid(`${label} must be a plain data object`);
+  const out = {};
+  for (const key of Reflect.ownKeys(value)) {
+    const field = Object.getOwnPropertyDescriptor(value, key);
+    if (!keys.includes(key) || !field || !Object.hasOwn(field, "value"))
+      invalid(`unsupported ${label} field or accessor`);
+    if (field.value !== undefined) out[key] = field.value;
+  }
+  return out;
+}
+
+export function normalizePdfVerificationOptions(value = {}) {
+  const out = verificationRecord(value, PDF_VERIFICATION_KEYS, "PDF verification option");
+  if (out.profile !== undefined) out.profile = normalizeAuthoringProfile(out.profile);
+  for (const [key, value] of Object.entries(out)) {
+    if (["allowRawHtml", "codeLineNumbers", "pageNumbers", "toc", "microtypeProtrusion",
+      "optimalPagination", "strictPagination", "footnoteBacklinks", "splitFootnotes"].includes(key)) {
+      if (typeof value !== "boolean") invalid(`${key} must be boolean`);
+    } else if (["baseFontSize", "headingScale", "tableFontSize"].includes(key)) {
+      if (typeof value !== "number" || !Number.isFinite(value) || value <= 0 || value > 1000000)
+        invalid(`${key} must be a positive finite number no greater than 1000000`);
+    } else if (["tocDepth", "fitToPages", "metadataEpochSeconds"].includes(key)) {
+      const minimum = key === "metadataEpochSeconds" ? 0 : 1;
+      const maximum = key === "tocDepth" ? 6 : key === "fitToPages" ? 1000 : Number.MAX_SAFE_INTEGER;
+      if (!Number.isSafeInteger(value) || value < minimum || value > maximum)
+        invalid(`invalid ${key}`);
+    } else if (["fontScale", "typeSize"].includes(key)) {
+      if (typeof value === "string" ? value.length > 64
+        : typeof value !== "number" || !Number.isFinite(value) || value <= 0)
+        invalid(`invalid ${key}`);
+    } else if (["font", "darkMode", "title", "author", "lang"].includes(key)) {
+      if (typeof value !== "string" || value.length > 4096) invalid(`invalid ${key}`);
+      const choices = { font: ["sans", "serif"], darkMode: ["auto", "disabled"] }[key];
+      if (choices && !choices.includes(value)) invalid(`invalid ${key}`);
+    } else if (key === "pdfImages" || key === "fontAssets") {
+      const fonts = key === "fontAssets", maximum = fonts ? 5 : 4096;
+      if (!Array.isArray(value) || value.length > maximum)
+        invalid(`${key} must be an array with at most ${maximum} entries`);
+      // Capture membership and records before a source coercion, asset copy or
+      // worker callback can replace another selected resource.
+      out[key] = Array.from({ length: value.length }, (_, index) => {
+        const field = Object.getOwnPropertyDescriptor(value, String(index));
+        if (!field || !Object.hasOwn(field, "value")) invalid(`${key} must contain dense data entries`);
+        const asset = verificationRecord(field.value,
+          fonts ? ["slot", "bytes", "weight"] : ["destination", "bytes"], `${key} asset`);
+        if (typeof asset[fonts ? "slot" : "destination"] !== "string") invalid(`invalid ${key} asset key`);
+        if (asset.weight !== undefined && (!Number.isInteger(asset.weight) || asset.weight < 1 || asset.weight > 1000))
+          invalid("font weight must be an integer from 1 through 1000");
+        return Object.freeze(asset);
+      });
+      Object.freeze(out[key]);
+    }
+  }
+  return Object.freeze(out);
+}
+
+/** Maximum complete schema-v1 JSON report, in UTF-8 bytes. */
+export const PDF_VERIFICATION_REPORT_LIMIT = 8 * 1024 * 1024;
+
+/** Validate the complete native report, not just an accessibility subset. This
+ * retains additive native fields and never recalculates the native digest. */
+export function validatePdfVerificationReport(report, code = "INVALID_WASM_RESPONSE") {
+  const fail = () => { throw Object.assign(new Error("Invalid full PDF verification report"), { code }); };
+  const object = value => value && typeof value === "object" && !Array.isArray(value);
+  const field = (value, key) => {
+    if (!object(value)) return fail();
+    const item = Object.getOwnPropertyDescriptor(value, key);
+    if (!item || !Object.hasOwn(item, "value")) return fail();
+    return item.value;
+  };
+  const count = value => Number.isSafeInteger(value) && value >= 0;
+  if (field(report, "schema_version") !== "1" || field(report, "target") !== "pdf"
+      || !count(field(report, "page_count"))
+      || typeof field(report, "digest") !== "string"
+      || !/^fnv1a64:[0-9a-f]{16}$/.test(report.digest)) fail();
+  const anchors = field(report, "anchors"), unresolved = field(anchors, "unresolved");
+  if (!count(field(anchors, "resolved")) || !Array.isArray(unresolved)
+      || !unresolved.every(value => typeof value === "string")) fail();
+  const findings = field(report, "findings"), pages = field(report, "pages");
+  if (!Array.isArray(findings) || !Array.isArray(pages) || pages.length !== report.page_count
+      || field(report, "verdict") !== (findings.length ? "findings" : "clean")) fail();
+  for (const finding of findings) {
+    if (typeof field(finding, "code") !== "string" || !finding.code
+        || typeof field(finding, "detail") !== "string") fail();
+  }
+  for (let index = 0; index < pages.length; index++) {
+    const page = pages[index], runs = field(page, "runs");
+    if (field(page, "number") !== index + 1 || !Array.isArray(runs)) fail();
+    for (const run of runs) {
+      if (typeof field(run, "text") !== "string" || typeof field(run, "kind") !== "string"
+          || !run.kind || !Number.isFinite(field(run, "x")) || !Number.isFinite(field(run, "y"))
+          || !Number.isFinite(field(run, "size")) || run.size < 0) fail();
+    }
+  }
+  const profile = Object.getOwnPropertyDescriptor(report, "profile");
+  if (profile && (!Object.hasOwn(profile, "value")
+      || !["commonmark-gfm", "gfm-plus"].includes(profile.value))) fail();
+  return report;
+}
+
+/** Capture native typography controls, without retaining caller objects or
+ * invoking accessors. Missing and explicit false values keep their spelling. */
+export function normalizePdfTypography(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)
+      || ![Object.prototype, null].includes(Object.getPrototypeOf(value)))
+    invalid("typography must be a plain data object");
+  const result = {};
+  for (const key of Reflect.ownKeys(value)) {
+    const field = Object.getOwnPropertyDescriptor(value, key);
+    if (!["homogeneous", "antiriver", "pareto", "themeSpacing", "lineHeight", "tableCellPaddingXEm", "tableCellPaddingYEm"].includes(key)
+        || !field || !Object.hasOwn(field, "value"))
+      invalid("typography has an unsupported field or accessor");
+    if (field.value === undefined) continue;
+    if (["lineHeight", "tableCellPaddingXEm", "tableCellPaddingYEm"].includes(key)) {
+      const [min, max] = key === "lineHeight" ? [1, 4] : [0, 8];
+      if (typeof field.value !== "number" || !Number.isFinite(field.value)
+          || field.value < min || field.value > max)
+        invalid(`typography.${key} must be finite and in ${min}..${max}`);
+    } else if (typeof field.value !== "boolean") invalid(`typography.${key} must be boolean`);
+    result[key] = field.value;
+  }
+  if (result.themeSpacing === false && ["lineHeight", "tableCellPaddingXEm", "tableCellPaddingYEm"]
+      .some(key => result[key] !== undefined))
+    invalid("typography spacing values require themeSpacing to be enabled");
+  return Object.freeze(result);
+}
+
+/** Canonical tokens use the existing native ABI; older engines reject them. */
+export function pdfTypographyTokens(value) {
+  const options = value === undefined ? {} : normalizePdfTypography(value);
+  const tokens = [];
+  for (const key of ["homogeneous", "antiriver", "pareto"]) if (options[key]) tokens.push(key);
+  const spacing = [["lineHeight", "line-height"], ["tableCellPaddingXEm", "table-padding-x"],
+    ["tableCellPaddingYEm", "table-padding-y"]];
+  if (options.themeSpacing || spacing.some(([key]) => options[key] !== undefined)) tokens.push("theme-spacing");
+  for (const [key, token] of spacing) if (options[key] !== undefined) tokens.push(`${token}=${options[key]}`);
+  return tokens;
+}
+
+/** Retained books accept the same bounded token grammar as the native core. */
+export function normalizePdfTypographyToken(token) {
+  if (["homogeneous", "antiriver", "pareto", "optimal-pagination", "strict-pagination",
+    "footnote-backlinks", "split-footnotes", "theme-spacing", "protrusion", "expansion"].includes(token)) return token;
+  const match = /^(line-height|table-padding-x|table-padding-y)=([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)$/.exec(token);
+  if (match) {
+    const value = Number(match[2]), [min, max] = match[1] === "line-height" ? [1, 4] : [0, 8];
+    if (Number.isFinite(value) && value >= min && value <= max) return `${match[1]}=${value}`;
+  }
+  invalid(`Unknown typography token: '${token}'`);
+}
+
+export function normalizeMicrotype(value) {
+  if (!["disabled", "protrusion", "expansion"].includes(value))
+    invalid("microtype must be disabled, protrusion or expansion");
+  return value;
+}
+
+/** HTML/EPUB font fidelity policy. PDF and outlined SVG use their own fonts. */
+export function normalizeFontEmbedding(value) {
+  if (!["subset", "full"].includes(value))
+    invalid("fontEmbedding must be subset or full");
+  return value;
+}
+
+export function normalizeHtmlFontFormat(value) {
+  if (!["woff1", "woff2", "ttf"].includes(value))
+    invalid("htmlFontFormat must be woff1, woff2 or ttf");
+  return value;
+}
+
+/** Single-document archival emission policy. Ordinary calls retain their
+ * original ABI and output envelope; explicit off is identical to omission. */
+export function normalizePdfArchival(profile, strict) {
+  if (profile !== undefined && profile !== "off" && profile !== "2b")
+    invalid("pdfA must be off or 2b");
+  if (strict !== undefined && typeof strict !== "boolean")
+    invalid("pdfAStrict must be boolean");
+  if (strict === true && profile !== "2b") invalid("pdfAStrict requires pdfA: 2b");
+  return Object.freeze(profile === "2b" ? { pdfA: "2b", pdfAStrict: strict ?? false } : {});
+}
+
+/** Validate a successful exporter receipt, not PDF/A conformance. Supplying
+ * expected also fences against an older worker silently dropping the policy. */
+export function pdfArchivalReceipt(output, expected, code = "INVALID_WASM_RESPONSE") {
+  const profile = output?.pdfA, strict = output?.pdfAStrict;
+  const present = profile !== undefined || strict !== undefined;
+  const valid = !present || (output.format === "pdf" && profile === "2b" && typeof strict === "boolean");
+  const matches = expected === undefined || (profile === expected.pdfA && strict === expected.pdfAStrict);
+  if (!valid || !matches) throw Object.assign(new Error(
+    "PDF output did not acknowledge the requested archival emission policy; rebuild matching renderer and worker packages",
+  ), { code });
+  return present ? { pdfA: profile, pdfAStrict: strict } : {};
+}
+
+/** Only the native typed-pagination contract becomes a coded host Error.
+ * Other renderer failures retain their existing representation and policy. */
+const PAGINATION_REASONS = Object.freeze({
+  PAGINATION_INFEASIBLE: "infeasible",
+  PAGINATION_BUDGET_EXCEEDED: "budget_exceeded",
+  PAGINATION_INVALID_INPUT: "invalid_input",
+  PAGINATION_COST_OVERFLOW: "cost_overflow",
+  PAGINATION_INVALID_PLAN: "invalid_plan",
+});
+export function isPdfPaginationError(error) {
+  return error instanceof Error && Object.hasOwn(PAGINATION_REASONS, error.code);
+}
+export function normalizePdfPaginationError(error) {
+  if (typeof error !== "string" || error.length > 4096) return error;
+  let value;
+  try { value = JSON.parse(error); } catch { return error; }
+  if (!value || typeof value !== "object" || Array.isArray(value)
+      || !Object.hasOwn(PAGINATION_REASONS, value.code)
+      || value.reason !== PAGINATION_REASONS[value.code]
+      || typeof value.message !== "string" || value.message.length > 2048) return error;
+  return Object.assign(new Error(value.message), { code: value.code, reason: value.reason });
+}
+
+/** PDF body-grid spacing in points. Preserve host precision until the core
+ * rounds once to milli-points. Zero keeps the default grid disabled. */
+export function normalizeBaselineGridPt(value) {
+  if (value === undefined) return undefined;
+  if (typeof value !== "number" || !Number.isFinite(value)
+      || (value !== 0 && (value < 1 || value > 144)))
+    invalid("pdf_baseline_grid: baselineGridPt must be 0 (disabled) or a finite number from 1 through 144 points");
+  return value;
+}
+
+/** Fitting changes font sizes and margins, which cannot preserve an explicitly
+ * chosen fixed grid. Every host rejects this combination before rendering. */
+export function validateBaselineGridFit(grid, fitToPages) {
+  if (grid > 0 && fitToPages > 0)
+    invalid("pdf_baseline_grid_incompatible: baseline grids cannot be combined with fitToPages");
+}
